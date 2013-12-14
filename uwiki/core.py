@@ -8,7 +8,7 @@ globals().update(app.roots.extensions)
 
 
 # Register other components.
-# from . import auth as _auth
-# from . import models
+from . import auth as _auth
+from . import models
 
 # Controllers are NOT registered here!

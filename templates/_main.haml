@@ -6,12 +6,11 @@
 
     - if current_user.is_authenticated():
         %.pull-right
-            %a(href=url_for('account', account=current_user))
-                %strong &= current_user.name
+            %strong &= current_user.name
 
             .btn-group.btn-group-xs
                 - if any(role in current_user.roles for role in ('wheel', 'observer')):
-                    %a.btn.btn-primary(href=url_for('cpanel'))
+                    %a.btn.btn-primary(href='#')
                         +utils.icon('cog')
                         Admin
                 

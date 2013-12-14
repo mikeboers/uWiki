@@ -1,0 +1,13 @@
+%%inherit(file="/_main.haml")
+%%namespace(name='utils', file='/_utils.haml')
+
+@breadcrumb
+    %li
+        login
+
+
+.row .col-sm-6 .panel.panel-info
+    .panel-heading %h3 Who are you, again?
+    %form.form.panel-body(method='POST', role='form')
+        = utils.render_form(form)
+        %button.btn.btn-primary(type='submit') Submit

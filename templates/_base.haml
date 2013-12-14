@@ -22,14 +22,14 @@
         
         %ol#primary-breadcrumb.breadcrumb
 
-            -# @breadcrumb_head
-            -# +self.breadcrumb_head
+            @breadcrumb_head
+            +self.breadcrumb_head
 
             %li
                 %a.logo(href='/') uWiki
 
-            -# @breadcrumb
-            -# +self.breadcrumb
+            @breadcrumb
+            +self.breadcrumb
 
         = next.body()
 
