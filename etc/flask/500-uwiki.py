@@ -7,3 +7,5 @@ ADMINS = ['admin@mikeboers.com']
 DEFAULT_MAIL_SENDER = 'website@mikeboers.com'
 
 APP_ENTRYPOINT = 'uwiki.web:app'
+
+STATUS_TEMPLATE = 'http_status.haml'
