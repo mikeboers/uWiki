@@ -1,0 +1,47 @@
+
+@import "compass/layout/sticky-footer"
+@include sticky-footer(64px, "#root", "#root-footer", "#footer")
+
+#primary-breadcrumb
+
+    .logo
+        margin-right: 2px
+
+    li
+        font-size: 20px
+        font-family: "Helvetica Neue", Helvetica, sans-serif
+        font-weight: 200
+
+    li + li:before
+        padding: 0 2px 0 4px
+        content: '/ '
+
+.media
+    margin-bottom: 15px
+
+.nav-tabs
+    margin-bottom: 15px
+
+#footer
+    height: 64px
+    // margin-top: 30px
+
+.panel-heading
+    h1, h2, h3, h4, h5, h6
+        margin: 0
+
+
+.has-error label
+    color: #b94a48
+
+label
+    .optional, .required, .error
+        font-size: 0.85em
+
+    .optional, .required
+        font-size: 0.85em
+        &:before
+            content: '['
+        &:after
+            content: ']'
+

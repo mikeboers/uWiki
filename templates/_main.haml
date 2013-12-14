@@ -1,0 +1,35 @@
+%%inherit(file="/_base.haml")
+%%namespace(name="utils", file="/_utils.haml")
+
+
+@breadcrumb_head
+
+    - if current_user.is_authenticated():
+        %.pull-right
+            %a(href=url_for('account', account=current_user))
+                %strong &= current_user.name
+
+            .btn-group.btn-group-xs
+                - if any(role in current_user.roles for role in ('wheel', 'observer')):
+                    %a.btn.btn-primary(href=url_for('cpanel'))
+                        +utils.icon('cog')
+                        Admin
+                
+                %a.btn.btn-default(href=url_for('logout'))
+                    +utils.icon('log-out')
+                    Logout
+    
+    - elif request.endpoint != 'login':
+        %.pull-right %a.btn.btn-primary.btn-xs(href=url_for('login', next=request.script_root + request.path))
+            +utils.icon('log-in')
+            Login
+
+
+@breadcrumb
+
+
+- for class_, message in get_flashed_messages(with_categories=True):
+    - class_ = 'info' if class_ == 'message' else class_
+    %.alert(class_='alert-' + class_) &= message
+
+= next.body()

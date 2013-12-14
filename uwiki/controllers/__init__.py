@@ -16,6 +16,4 @@ requires_root = lambda func: auth.ACL('''
 
 # --- Register the pages.
 
-@app.route('/')
-def hello():
-    return 'Hello from uWiki!'
+from . import index

@@ -1,0 +1,28 @@
+-!
+    import datetime
+
+
+%ol.breadcrumb %li %small
+
+    All rights to site content reserved by original authors, unless noted otherwise.
+
+    %br
+
+
+    uWiki is
+    -
+        links = '''
+            http://flask.pocoo.org
+            http://sqlalchemy.org
+            http://makotemplates.org
+            http://jquery.com/
+            http://getbootstrap.com
+            http://python.org
+        '''.strip().split()
+        words = 'built on the shoulders of others,'.split()
+    
+    - for url, word in zip(links, words):
+        %a(href=url) &= word
+
+    and <a href="https://github.com/mikeboers/uWiki">available on GitHub</a>.
+

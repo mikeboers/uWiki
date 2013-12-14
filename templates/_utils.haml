@@ -1,0 +1,88 @@
+-!
+    import hashlib
+    import os
+    from urllib import urlencode
+
+
+@gravatar(email, size=200, robohash=False, **kw)
+    -
+        hash_ = hashlib.md5(email.strip().lower()).hexdigest()
+        gravatar_url = '//gravatar.com/avatar/%s?s=%s' % (hash_, size)
+        if robohash:
+            robohash_url = 'http://robohash.org/%s.png?size=%sx%s&bgset=any' % (hash_, size, size)
+            gravatar_url = '%s&%s' % (gravatar_url,  urlencode(dict(d=robohash_url)))
+
+    %img(src=gravatar_url, width=size, height=size, **kw)
+
+
+@permalink(target, anchor=False)
+    - if anchor:
+        %a.permalink(href='#' + target, id=target) &para;
+    - else:
+        %a.permalink(href='#' + target) &para;
+
+@icon(name)
+    %span.glyphicon(class_='glyphicon-' + name)
+
+
+@field_flags(field)
+    - if field.flags.optional:
+        %span.label(class_='label-danger' if field.errors else 'label-default') Optional
+    - elif field.flags.required:
+        %span.label(class_='label-danger' if field.errors else 'label-primary') Required
+    - for error in field.errors:
+        %span.label.label-danger &= error
+
+
+@render_form(form)
+    -
+        nonce = os.urandom(4).encode('hex')
+        form_id = 'form-%s' % nonce
+    
+    - for field in form:
+
+        - if field.type in ('HiddenField', 'CSRFTokenField'):
+            = field()
+            - continue
+
+        - if field.type in ('BooleanField', ):
+            .checkbox %label
+                = field()
+                &= field.label.text
+                +field_flags(field)
+            - continue
+
+        .form-group(class_=['has-error' if field.errors else ''])
+
+            %label(**{'for': field.label.field_id})
+                &= field.label.text
+                +field_flags(field)
+            
+            -# if field.type == 'FormField':
+                .field.type-FormField(class_='form-type-' + field.form_class.__name__)
+                    = render_form(field)
+
+            -# if field.type == 'FieldList':
+      
+            -# % elif field.type == 'FieldList':
+                <%include file="_wtform.html" args="form=field" />
+              
+              % elif field.type == 'DateTimeField':
+                <div class="field type-${field.type}">
+                  ${field(type='datetime')}
+                  ## <span class="add-on"><i class="icon-th"></i></span>
+                </div>
+                <script>jQuery(function($) {
+                  if ($.autodate)
+                    $(${json('#%s #%s' % (form_id, field.name))}).autodate({type:${field.type[:-5].lower()|json}});
+                })</script>
+
+            = field(class_='form-control')
+              
+              
+            -# % if field.type == 'MarkdownField':
+                <script>jQuery(function($) {
+                  if ($.markdownEditor)
+                    $(${json('#%s #%s' % (form_id, field.name))}).markdownEditor();
+                })</script>
+      
