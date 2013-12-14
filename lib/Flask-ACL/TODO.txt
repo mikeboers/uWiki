@@ -1,0 +1,44 @@
+
+- ACE parsing should be able to pick up arguments to predicates:
+    "ALLOW ROLE('something') ANY" or
+    "ALLOW ROLE.something ANY" or
+    ('ALLOW', Role('wheel'), 'ANY')
+
+
+- Figure out what to do about ANY/ALL.
+
+- Should we have a mechanism for an ACL being different on a class vs its
+  instance, or should we do that via a @classproperty?
+
+  @classproperty
+  def __acl__(cls, self):
+    '''self may be None'''
+
+
+Put the predicate context onto a Flask stack proxy?
+
+    from flask.ext.acl import predicate_context
+
+
+@auth.predicate('ROOT')
+define Root(user, **ctx):
+    return 'wheel' in getattr(user, 'roles', set())
+
+
+- Permission checks via functions too?
+
+    @auth.permission('ANY'):
+    define AnyPermission(permission):
+        return True
+
+    Or, treat different types differently:
+
+
+    use for:
+        delete -> delete, write, read
+        write -> write, read
+        read -> read
+
+
+@flask.ext.acl.register_predicate
+
