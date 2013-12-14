@@ -1,0 +1,85 @@
+
+- `manage install` to setup service and nginx
+  - INSTANCE_ID in etc/flask
+
+- request.environ in tracebacks and emails
+
+- merge DOMAIN and DOMAINS into single list of domains.
+    - maybe VIRTUAL_HOSTS, DOMAIN_NAMES, or DOMAINS.
+
+- take a look at how heroku buildpacks work, and see if we can have
+  some sort of automated deployment
+    - relocatable venvs?
+    - would need another later in the folder structure that the builder
+      manages: /srv/mikeboers.com/www/stage-8025 (for port 8025)
+      - includes a full clone, copies of all the static assets, clone
+        of the virtualenv, random-ish port
+
+- pull in form rendering from Spoon
+
+- make Flask-WTCrud which pulls WTForms via ajax and displays them in
+  a bootstrap dialog
+
+- gem/node commands
+
+- replace baker with argparse in manage and migrate
+  - roots.command.Command class provides argument setup and the final function
+
+- manage install
+
+- MANAGE_COMMANDS be a list of entrypoints for other commands
+
+- migrate create 'name of new patch'
+- migrate upgrade
+
+- get Roots into template path
+- get Roots into static path, maybe; this may not be nessesary since others can
+  register blueprints which provide their own static folders
+
+- be able to set FLASK_INSTANCE_PATH
+
+
+- It will provide an easy mechanism for Python/Ruby/Node/general packages, but
+  won't actually administer them itself.
+
+  roots {pip,gem,npm,bower} {install,freeze}
+  roots packages freeze -> freeze them all
+  roots packages install -> install from etc/{pip,gem,npm,bower}-requirements.txt
+
+- configuration decorators:
+
+    @provides('logging')
+    @requires('ADMINS')
+    def setup_logging(config):
+        config.setdefault('LOG_DEFAULT_LEVEL', logging.INFO)
+        for admin in config.get('ADMINS', []):
+            # Setup email logger.
+            pass
+
+    -- OR --
+
+    @defer(requires='ADMINS', provides='logging')
+    def setup_logging(config):
+        pass
+
+    @defer(priority=500)
+    def _something(config):
+        pass
+
+- subcommands via argparse. flask_roots.commands package will be walked looking
+  for `register_command` functions.
+
+- base commands for fabric in flask_roots.fabric.exports:
+    in manage.py: from flask.ext.roots.fabric.exports import *
+
+- for path in flask_roots.utils.iter_resources('etc/*-requirements.txt', instance_first=True):
+    iterate across the various paths: roots/etc, app/etc, app/var/etc
+
+    Find these via FLASK_INSTANCE_PATH, FLASK_ROOT_PATH, and relative to flask_roots
+    (via the root_path on the Flask-Roots Blueprint).
+
+    This is very similar to `Flask.open_instance_resource(path)`.
+
+
+
+
