@@ -7,7 +7,6 @@ import sqlalchemy as sa
 import werkzeug as wz
 from flask.ext.login import current_user
 
-from ..utils import debug
 from ..core import app, auth, db
 from .roleset import RoleSetColumn
 
