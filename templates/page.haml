@@ -1,4 +1,36 @@
 %%inherit(file="/_main.haml")
+%%namespace(name='utils', file='/_utils.haml')
 
-PAGE?! ${repr(page)|h}
+
+@controls
+    - if not form: %ul.controls.list-unstyled.list-inline.pull-right
+        %li %a.btn.btn-default.btn-xs(href=url_for('page', path=path, mode='edit')) Edit
+        - if page:
+            -# %li %a.btn.btn-default.btn-xs(href=url_for('page', path=path, mode='history')) History
+
++controls
+
+%h1
+    - if page:
+        =|h page.title
+    - else:
+        =|h path.replace('_', ' ')
+
+
+- if form:
+    %form.form.panel-body(method='POST', role='form')
+        +utils.render_form(form)
+        %button.btn.btn-primary(type='submit') Save
+
+- elif page:
+    
+    = markdown(page.content)
+
+    +controls
+
+
+- else:
+
+    %em This page has no content yet.
+
 

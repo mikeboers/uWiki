@@ -19,3 +19,4 @@ requires_root = lambda func: auth.ACL('''
 
 from . import index
 from . import login
+from . import page
