@@ -1,10 +1,10 @@
 
-@nav(path, active=None)
+@nav(name, active=None)
 
     - active = active or request.args.get('action', '')
     @tab(action)
         %li(class_='active' if action == active else '')
-            %a(href='#' if action == active else url_for('page', path=path, **{'action': action} if action else {}))
+            %a(href='#' if action == active else url_for('page', name=name, **{'action': action} if action else {}))
                 +caller.body
 
     %ul.nav.nav-tabs

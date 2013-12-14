@@ -3,6 +3,7 @@ import datetime
 import sqlalchemy as sa
 import werkzeug as wz
 from flask.ext.login import current_user
+from flask.ext.roots.routing import urlify_name
 
 from ..core import app, auth, db
 
@@ -14,16 +15,31 @@ class Page(db.Model):
         autoload=True,
         extend_existing=True,
     )
+
+    _title = db.Column('title', db.String)
     
     def __repr__(self):
         return '<%s %s>' % (
             self.__class__.__name__,
-            self.path
+            self.name
         )
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        self._title = value
+        self.name = urlify_name(value)
 
     @property
     def content(self):
         return self.versions[-1].content if self.versions else None
+
+    @content.setter
+    def content(self, value):
+        self.versions.append(PageContent(content=value))
 
 
 class PageContent(db.Model):

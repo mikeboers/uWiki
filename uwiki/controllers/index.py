@@ -2,5 +2,4 @@ from . import *
 
 @app.route('/')
 def index():
-    return render_template('index.haml')
-
+    return redirect(url_for('page', name='Index'))

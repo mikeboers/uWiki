@@ -5,5 +5,11 @@ rm -rf var/sqlite
 mkdir -p var/sqlite
 migrate
 
-echo Creating account: $(whoami)
-uwiki-account -p password $(whoami)
+echo Creating user: $(whoami)
+uwiki-user -p password $(whoami)
+
+echo Creating initial pages
+for page in etc/pages/*; do
+    echo $(basename $page)
+    uwiki-page edit $(basename $page) < $page
+done

@@ -3,9 +3,9 @@
 %%namespace(name='page_utils', file='./_utils.haml')
 
 @breadcrumb
-    %li =|h page.title if page else path
+    %li =|h page.title if page else name
 
-+page_utils.nav(path)
++page_utils.nav(name)
 
 %form(method='POST')
     +utils.render_form(form, flags=False)

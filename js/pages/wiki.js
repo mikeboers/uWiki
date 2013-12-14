@@ -6,7 +6,7 @@ app.endpoint_handler('page', function() {
     textarea.hide();
 
     var editor = ace.edit(editdiv[0]);
-    editor.setTheme('ace/theme/textmate')
+    editor.setTheme('ace/theme/tomorrow')
     editor.getSession().setValue(textarea.val())
 
     ace.config.setModuleUrl("mymarkdown", "/js/ace/mymarkdown.js")

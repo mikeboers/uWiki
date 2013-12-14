@@ -14,7 +14,8 @@ setup(
     
     entry_points={
         'console_scripts': [
-            'uwiki-account = uwiki.commands.account:main',
+            'uwiki-user = uwiki.commands.user:main',
+            'uwiki-page = uwiki.commands.page:main',
         ],
     },
     

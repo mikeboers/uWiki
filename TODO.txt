@@ -1,6 +1,7 @@
 
-- http://hallojs.org/demo/markdown
-- http://ace.c9.io/#nav=about
+- title sets path
+- redirects are created whenever you change the path
+    - redirects are simply a Page with redirect=new_path
 
 
 - sidebar from content

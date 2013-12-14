@@ -3,12 +3,12 @@
 %%namespace(name='page_utils', file='./_utils.haml')
 
 @breadcrumb
-    %li =|h page.title if page else path
+    %li =|h page.title if page else name
 
-+page_utils.nav(path)
++page_utils.nav(name)
 
 - if page:
-    = markdown(page.content)
+    #page-content= markdown(page.content)
 
 - else:
     %em This page has no content.

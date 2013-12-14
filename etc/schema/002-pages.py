@@ -10,8 +10,11 @@ def upgrade(engine):
     pages = sa.Table('pages', meta,
 
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('title', sa.String, nullable=False),
-        sa.Column('path', sa.String, nullable=False),
+        sa.Column('name', sa.String, unique=True, nullable=False),
+
+        # One of these should be set.
+        sa.Column('title', sa.String),
+        sa.Column('redirect', sa.String),
 
     )
     pages.create()

@@ -8,40 +8,36 @@ from . import *
 class PageForm(Form):
 
     title = wtf.TextField(validators=[wtf.validators.Required()])
-    path = wtf.TextField(validators=[wtf.validators.Required()])
     content = wtf.TextAreaField(validators=[wtf.validators.Required()])
 
 
-@app.route('/wiki/<path>', methods=['GET', 'POST'])
-def page(path='Index'):
+@app.route('/wiki/<name>', methods=['GET', 'POST'])
+def page(name='Index'):
 
-    page = Page.query.filter(Page.path == path).first()
+    name = urlify_name(name)
+    page = Page.query.filter(Page.name.like(name)).first()
+
+    # Assert we are on the normalized page.
+    if page and page.name != name:
+        return redirect(url_for('page', name=page.name))
 
     if request.args.get('action') == 'edit':
 
         form = PageForm(request.form, page)
-        form.path.data = form.path.data or path
-        form.title.data = form.title.data or path
+        form.title.data = form.title.data or name
 
         if form.validate_on_submit():
-
             if not page:
-                page = Page(path=urlify_name(form.title.data))
+                page = Page()
                 db.session.add(page)
-
-            page.title = form.title.data
-            page.path = urlify_name(form.path.data)
-            page.versions.append(PageContent(
-                content=form.content.data,
-            ))
-
+            form.populate_obj(page)
             db.session.commit()
-            return redirect(url_for('page', path=page.path))
+            return redirect(url_for('page', name=page.name))
 
-        return render_template('page/edit.haml', path=path, page=page, form=form)
+        return render_template('page/edit.haml', name=name, page=page, form=form)
 
     return render_template('page/read.haml',
         page=page,
-        path=path,
+        name=name,
     )
 
