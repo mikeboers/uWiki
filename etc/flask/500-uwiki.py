@@ -17,4 +17,6 @@ MARKDOWN_EXTS = {
     'footnotes': True,
     'fenced_code': True,
     'abbr': True,
+    'toc': True,
+    'wikilinks(base_url=/wiki/,end_url=)': True,
 }
