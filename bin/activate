@@ -1,0 +1,66 @@
+#!/bin/bash
+
+APP_BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_ROOT="$(dirname "$APP_BIN")"
+
+export FLASK_ROOT_PATH="$APP_ROOT"
+export FLASK_INSTANCE_PATH="$APP_ROOT/var"
+
+# Create a Python virtual environment.
+VIRTUAL_ENV="$APP_ROOT/var/venv-$(uname)-$(arch)"
+if [[ ! -e "$VIRTUAL_ENV/bin/python" ]]
+then
+
+    # Make sure we even have virtualenv.
+    if [[ ! -e "$APP_BIN/virtualenv" ]]
+    then
+        curl -o "$APP_BIN/virtualenv" https://raw.github.com/pypa/virtualenv/master/virtualenv.py
+        chmod +x "$APP_BIN/virtualenv"
+    fi
+
+    # Create it.
+    mkdir -p "$VIRTUAL_ENV"
+    "$APP_BIN/virtualenv" --no-site-packages --distribute "$VIRTUAL_ENV"
+fi
+. "$VIRTUAL_ENV/bin/activate"
+
+# Drop into Python virtualenv.
+. "$VIRTUAL_ENV/bin/activate"
+
+
+# All variables are set below this point so that the critical ones will
+# get reset when the venv is deactivated.
+
+NEW_PATH="$APP_ROOT/bin"
+
+# Find Flask-Roots
+ROOTS_INIT="$(python -c 'import flask.ext.roots as r; print r.__file__' 2>/dev/null)"
+ROOTS_ROOT="$(dirname "$(dirname "$ROOTS_INIT")")"
+if [[ "$ROOTS_INIT" ]]; then
+    NEW_PATH="$NEW_PATH:$ROOTS_ROOT/bin"
+else
+    echo "cannot import Flask-Roots; install and activate again"
+fi
+unset ROOTS_INIT
+unset ROOTS_ROOT
+
+export PATH="$NEW_PATH:$PATH"
+unset NEW_PATH
+
+# Make sure this project is directly importable, even if not installed.
+export PYTHONPATH="$PYTHONPATH:$APP_ROOT"
+
+# Ruby gems.
+export GEM_HOME="$VIRTUAL_ENV"
+export GEM_PATH=""
+
+# Node packages.
+export NPM_CONFIG_GLOBAL="true"
+export NPM_CONFIG_PREFIX="$VIRTUAL_ENV"
+
+# Bower packages.
+export bower_cwd="$VIRTUAL_ENV"
+export bower_directory="lib/bower"
+
+unset APP_ROOT
+unset APP_BIN

@@ -1,0 +1,2 @@
+compass==0.12.2
+sprockets==2.10.0

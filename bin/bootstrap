@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# Bootstrap the environment that this project will run in. This script
+# is designed to be indempotent, so feel free to run it between upgrades
+# to make sure everything is in place.
+
+# Create a Python virtual environment, and drop into it.
+VENV="$(pwd)/var/venv-$(uname)-$(arch)"
+if [[ ! -e $VENV/bin/python ]]
+then
+    mkdir -p $VENV
+    python2.7 vendor/virtualenv-1.9.1/virtualenv.py --no-site-packages --distribute $VENV
+fi
+
+. bin/activate
+
+# Install requirements.
+pip install -r etc/requirements.txt
+pip install -e .
+
+# Create directories.
+mkdir -p var/etc/flask
+mkdir -p var/sqlite
+
+
+echo 'Installing GEMs...'
+gem-install etc/gems.txt
+
+echo 'Running migrations...'
+migrate
