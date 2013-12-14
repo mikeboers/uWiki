@@ -1,7 +1,10 @@
 
-- tiny flask app
-  - subtrees
+- http://hallojs.org/demo/markdown
+- http://ace.c9.io/#nav=about
 
-- new bootstrap
-- users + login
-- 
+
+- sidebar from content
+
+- uploading assets
+  - image resizing
+
