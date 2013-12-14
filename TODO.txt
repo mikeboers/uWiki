@@ -1,11 +1,10 @@
 
-- title sets path
 - redirects are created whenever you change the path
     - redirects are simply a Page with redirect=new_path
 
-
-- sidebar from content
+- table of contents from headers
 
 - uploading assets
   - image resizing
 
+- make sure we have the most recent Flask-Roots, PyHAML, etc..
