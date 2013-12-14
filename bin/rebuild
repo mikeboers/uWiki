@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo Rebuilding database
+rm -rf var/sqlite
+mkdir -p var/sqlite
+migrate
+
+echo Creating account: $(whoami)
+uwiki-account -p password $(whoami)

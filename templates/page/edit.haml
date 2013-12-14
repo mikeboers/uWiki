@@ -1,0 +1,12 @@
+%%inherit(file="/_main.haml")
+%%namespace(name='utils', file='/_utils.haml')
+%%namespace(name='page_utils', file='./_utils.haml')
+
+@breadcrumb
+    %li =|h page.title if page else path
+
++page_utils.nav(path)
+
+%form(method='POST')
+    +utils.render_form(form, flags=False)
+    %button.btn.btn-primary(type='submit') Save

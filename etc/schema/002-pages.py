@@ -27,7 +27,6 @@ def upgrade(engine):
         sa.Column('creator_id', sa.Integer, sa.ForeignKey('users.id'), nullable=False),
 
         sa.Column('content', sa.String, nullable=False),
-        sa.Column('description', sa.String, nullable=False),
 
     )
     contents.create()

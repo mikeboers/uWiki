@@ -1,0 +1,14 @@
+%%inherit(file="/_main.haml")
+%%namespace(name='utils', file='/_utils.haml')
+%%namespace(name='page_utils', file='./_utils.haml')
+
+@breadcrumb
+    %li =|h page.title if page else path
+
++page_utils.nav(path)
+
+- if page:
+    = markdown(page.content)
+
+- else:
+    %em This page has no content.

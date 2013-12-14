@@ -34,7 +34,7 @@
         %span.label.label-danger &= error
 
 
-@render_form(form)
+@render_form(form, flags=True)
     -
         nonce = os.urandom(4).encode('hex')
         form_id = 'form-%s' % nonce
@@ -49,14 +49,16 @@
             .checkbox %label
                 = field()
                 &= field.label.text
-                +field_flags(field)
+                - if flags:
+                    +field_flags(field)
             - continue
 
         .form-group(class_=['has-error' if field.errors else ''])
 
             %label(**{'for': field.label.field_id})
                 &= field.label.text
-                +field_flags(field)
+                - if flags:
+                    +field_flags(field)
             
             -# if field.type == 'FormField':
                 .field.type-FormField(class_='form-type-' + field.form_class.__name__)
