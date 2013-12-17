@@ -258,6 +258,8 @@ def upstart():
     config = get_config()
     env = {
         'APP_ENTRYPOINT': config['APP_ENTRYPOINT'],
+        'FLASK_ROOT_PATH': os.environ['FLASK_ROOT_PATH'],
+        'FLASK_INSTANCE_PATH': os.environ['FLASK_INSTANCE_PATH'],
         'VIRTUAL_ENV': os.environ['VIRTUAL_ENV'],
     }
     env_fh = tempfile.NamedTemporaryFile()
