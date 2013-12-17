@@ -1,0 +1,147 @@
+
+- "unicode_as_entities" option on engine
+
+- Error if we can't parse kwargs_expr for a Mako node, since we won't be able
+  to do those as a template at runtime, although we might be able to do it with
+  a slightly different syntax.
+
+- Treat tabs as 8 spaces (like Python) OR throw an exception when they are mixed
+
+- Should we also parse tags that are not at the front of the line? E.g.::
+
+    There is a %a(href="#") link
+    in the middle of this line.
+
+- Assert that my mini control statements pass through untouched. E.g.::
+
+    %li Before %{- if something} inside %{- end} after.
+    
+- smarter node-arg parsing
+	- allow for %(data-attribute="value")
+	- allow for %(a="one" b="two")
+		- note the lack of a comma
+	- allow for %{:class => "value", "id" => "value2"}
+	- allow for %{"class": "value"}
+	- decide if I want to allow %(key1="value", "key2":"value", :key3 => "value" key4="value")
+		- the parse I have could handle it, but it may not make too much sense to allow
+
+- attributes should be able to spread across multiple lines:
+	e.g.: %script(type='text/javascript,
+	        src ='/js/example.js')
+	- would need to switch to passing the rest of the document around instead of
+	  the rest of the current line, but it should be doable	
+
+- in html mode, boolean attributes need not have a value
+	- see: http://www.w3.org/TR/html5/common-microsyntaxes.html#boolean-attributes
+	- see: http://www.w3.org/TR/html5/index.html#attributes-1
+
+- haml filter to strip leading whitespace (like docstrings)
+	:dedent
+
+- haml filters should stack
+	:dedent,sass
+
+- cdata filter should cgi.escape if in html4 mode
+    - move filters into runtime?
+
+- see how real haml dedents filtered content
+
+- consider adding << as dedent operator
+	%pre<<
+		This will be de-dented.
+	
+	- is this the same as the ":preserve" filter?
+	
+- haml tags should be able to have positional argument names
+	default to (name='div', id=None, class=None)
+		%('a' * 10)
+		%xsl:template(match)
+		%xsl:apply-templates(select)
+
+- engine for current template should be availible via "__haml.get_engine()"
+	- perhaps associate with the mako stack pointer?
+
+- filters that extend from a known class should also be passed the engine/context
+  so that they can see what mode the generator is in. This will allow for CDATA
+  blocks to be omitted for javascript/css filters.
+
+- look at what the output of "real" haml looks like in production vs debug
+	- I may be trying too hard in order to match some idealistic output which
+	  isn't really nessesary
+
+- !!! xsl stylesheet v1
+	- add the xml node and the xsl:stylesheet node
+		<?xml version='1.0' encoding='utf-8' ?>
+
+- non-selfclosing tag list should be a property of the engine object so it can
+  be set at compile, render, or runtime.
+
+- transform doctype declaration into general config setting syntax
+    - doctypes
+        !!! xml (or XML)
+            - outputs: <?xml version='1.0' encoding='utf-8' ?>
+            - sets us into xml mode (the default)
+        !!! xhtml strict
+        !!! html5
+            - <!DOCTYPE html>
+        !!!
+            - throw an error; we don't want a default
+	- indents
+        !!! indent None (or '', or 0)
+		!!! indent '  ' (or 2, or '\t', or 4)
+	- default filters
+        !!! default_filter html
+	!!! no_self_close style False
+
+
+- Start thinking about exception handling (and making sense of it).
+    
+    It would be very nice if there was a way to adapt exception tracebacks
+    similar to how Mako does it so that errors can be traced back to the
+    original HAML source.
+    
+    All mako does is throw comments into the compiled template the line number
+    of the source. So if we added:
+    
+        ## PyHAML SOURCE LINE (\d+)
+    
+    This should not have any effect on the final mako at all.
+	
+	- add a lineno to each tag as it is generated
+	- output a line comment every time the lineno changes on a tag that we are
+	  visiting
+
+- turn Greedy nodes into SourceProcessor
+    they receive raw source lines with indentation intact
+
+- filters should be able to pull from haml.filters as well
+	- we could include them all into the globals()
+	- OR have a haml.runtime.get_filter('name', globals()) to do it
+
+- implement as many of the filters in from the docs as we can
+ 	- see: http://haml-lang.com/docs/yardoc/file.HAML_REFERENCE.html#filters
+	- "scss" for other sass syntax
+        `sass --scss --style compressed`
+	- "python" should do the same as "ruby"
+	- "mako" should just drop it in place
+		- should this auto-dedent?
+		- :dedent,mako
+			Something something
+		- don't know if this is actually filterable though...
+
+- filters should be able to have access to engine
+    - this will allow for "mako" filter to pass unprocessed mako through
+    - a SmartFilter class could be called with the engine
+
+- filters should be able to have arguments
+	- f(*args) -> f(*args)(to_filter)
+
+- generalize all control structures
+    - if/elif/else/endif
+    - for/else/endfor
+    - try/catch/else/finally/endtry
+    - while/endwhile
+
+
+
+
