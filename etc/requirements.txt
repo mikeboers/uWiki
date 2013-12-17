@@ -29,7 +29,9 @@ Pygments==1.6
 greenlet==0.4.1
 gunicorn==18.0
 gevent==0.13.8
+honcho==0.5.0
 
 -e lib/Flask-Roots
 
 Flask-Mail
+

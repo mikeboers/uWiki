@@ -4,7 +4,9 @@ import glob
 import grp
 import os
 import pwd
+import shutil
 import signal
+import tempfile
 from subprocess import Popen, call, check_output, CalledProcessError, PIPE
 
 try:
@@ -230,6 +232,41 @@ def services():
         ))
     call(['chmod', 'a+x', log_path])
 
+
+def get_procfile():
+    for path in (
+        os.path.join(instance_path, 'etc', 'Procfile'),
+        os.path.join(root_path, 'Profile'),
+        os.path.join(our_path, 'etc', 'Procfile'),
+    ):
+        if os.path.exists(path):
+            return path
+    raise RuntimeError('could not find Procfile')
+
+
+@command
+def upstart():
+
+    procfile = get_procfile()
+    shutil.rmtree('var/etc/init')
+
+    config = get_config()
+    env = {
+        'VIRTUAL_ENV': os.environ['VIRTUAL_ENV'],
+    }
+    env_fh = tempfile.NamedTemporaryFile()
+    for k, v in sorted(env.iteritems()):
+        env_fh.write('%s="%s"\n' % (k, v))
+    env_fh.flush()
+    call([
+        'honcho', 'export',
+        '--log', 'var/log',
+        '--env', env_fh.name,
+        '--port', str(config['PORT']),
+        '--app', config['DOMAIN'],
+        '--procfile', procfile,
+        'upstart', 'var/etc/init',
+    ])
 
 
 @command(default=True)

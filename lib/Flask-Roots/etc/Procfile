@@ -1,0 +1,1 @@
+web: $VIRTUAL_ENV/bin/gunicorn -k gevent -b 0.0.0.0:${PORT} -p var/web.pid $APP_ENTRYPOINT
