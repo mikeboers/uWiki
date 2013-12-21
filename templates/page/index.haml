@@ -1,0 +1,14 @@
+%%inherit(file="/_main.haml")
+%%namespace(name='utils', file='/_utils.haml')
+%%namespace(name='page_utils', file='./_utils.haml')
+
+@breadcrumb
+    %li Page Listing
+
+%h1
+    Page Listing
+
+%ul
+    - for page in pages:
+        %li
+            %a(href=url_for('page', name=page.name))= page.title
