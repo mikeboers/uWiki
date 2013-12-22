@@ -11,7 +11,7 @@ class PageForm(Form):
     content = wtf.TextAreaField(validators=[wtf.validators.Required()])
 
 
-@app.route('/wiki')
+@app.route('/wiki/')
 def page_index():
     pages = Page.query.all()
     pages.sort(key=lambda p:p.title)

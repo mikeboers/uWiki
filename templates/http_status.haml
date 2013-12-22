@@ -1,20 +1,17 @@
 %%inherit(file="/_base.haml")/
--
-    _code = code or 500
-    _title = title or 'Internal Server Error'
 
 
-<h1>${_code}!</h1>
-<h2>${_title|h}</h2>
+<h1>${status.code}!</h1>
+<h2>${status.name|h}</h2>
 
-- if _code == 404:
+- if status.code == 404:
     <p>The requested URL (${request.path|h}) was not found on the server.</p>
-- elif description:
-    ${description}
+- elif status.description:
+    ${status.description}
 
 <p>
     <span class="cute">That is all I know.</span>
-    <a href="mailto:webstatus@mikeboers.com?subject=${"%s on %s" % (_code, request.environ.get('SERVER_NAME'))}">
+    <a href="mailto:webstatus@mikeboers.com?subject=${"%s on %s" % (status.code, request.environ.get('SERVER_NAME'))}">
         Feel free to tell me more.
     </a>
 </p>
