@@ -2,12 +2,12 @@
 @nav(name, active=None)
 
     - active = active or request.args.get('action', '')
-    @tab(action)
-        %li(class_='active' if action == active else '')
+    @tab(action, class_='')
+        %li(class_=('active' if action == active else '') + class_)
             %a(href='#' if action == active else url_for('page', name=name, **{'action': action} if action else {}))
                 +caller.body
 
     %ul.nav.nav-tabs
         +tab('') Read
         +tab('edit') Edit
-        -# +tab('history') View History
+        // +tab('history', class_='pull-right') View History
