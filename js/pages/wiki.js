@@ -7,8 +7,12 @@ app.endpoint_handler('page', function() {
 
     var editor = ace.edit(editdiv[0]);
     editor.setTheme('ace/theme/tomorrow')
-    editor.getSession().setValue(textarea.val())
-
+    
+    var session = editor.getSession();
+    session.setValue(textarea.val());
+    session.setUseWrapMode(true);
+    session.setWrapLimitRange(null, null);
+    
     ace.config.setModuleUrl("mymarkdown", "/js/ace/mymarkdown.js")
     editor.getSession().setMode('ace/mode/markdown')
 
