@@ -9,7 +9,7 @@ from ..core import app, db, auth
 from ..models import User, Page, PageContent
 
 
-requires_root = lambda func: auth.ACL('''
+requires_root = lambda func: auth.route_acl('''
     ALLOW ROOT ANY
     DENY ALL ANY
 ''')(func)

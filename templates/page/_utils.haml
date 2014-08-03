@@ -1,13 +1,17 @@
 
 @nav(name, active=None)
 
+    -
+        if not current_user.is_authenticated():
+            return ''
+
     - active = active or request.args.get('action', '')
     @tab(action, class_='')
-        %li(class_=('active' if action == active else '') + class_)
+        %li(class_=('active ' if action == active else '') + class_)
             %a(href='#' if action == active else url_for('page', name=name, **{'action': action} if action else {}))
                 +caller.body
 
     %ul.nav.nav-tabs
         +tab('') Read
         +tab('edit') Edit
-        // +tab('history', class_='pull-right') View History
+        +tab('history', class_='pull-right') View History

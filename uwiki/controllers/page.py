@@ -27,7 +27,7 @@ def page(name='Index'):
     name = urlify_name(name)
     page = Page.query.filter(Page.name.like(name)).first()
 
-    # Make sur private pages stay that way.
+    # Make sure private pages stay that way.
     if not current_user.is_authenticated() and (not page or not page.is_public):
         abort(404)
 
@@ -35,8 +35,12 @@ def page(name='Index'):
     if page and page.name != name:
         return redirect(url_for('page', name=page.name))
 
-    if request.args.get('action') == 'edit':
+    if request.args.get('action') == 'history':
+        if not current_user.is_authenticated():
+            return app.login_manager.unauthorized()
+        return render_template('page/history.haml', name=name, page=page)
 
+    if request.args.get('action') == 'edit':
         if not current_user.is_authenticated():
             return app.login_manager.unauthorized()
 
@@ -53,8 +57,16 @@ def page(name='Index'):
 
         return render_template('page/edit.haml', name=name, page=page, form=form)
 
+    if 'version' in request.args:
+        version = next((version for version in page.versions if version.id == int(request.args['version'])), None)
+        if not version:
+            abort(404)
+    else:
+        version = request.versions[-1] if request.versions else None
+
     return render_template('page/read.haml',
         page=page,
+        version=version,
         name=name,
     )
 

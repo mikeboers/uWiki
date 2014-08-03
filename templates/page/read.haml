@@ -7,8 +7,12 @@
 
 +page_utils.nav(name)
 
-- if page:
-    #page-content= markdown(page.content)
+- if version:
+    
+    - if version is not page.versions[-1]:
+        %.alert.alert-warning This is not the most recent version.
+
+    #page-content= markdown(version.content)
 
 - else:
     %em This page has no content.
