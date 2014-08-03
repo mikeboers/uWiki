@@ -1,0 +1,4 @@
+[submodule "lib/PyHAML"]
+	path = lib/PyHAML
+	url = git@github.com:mikeboers/PyHAML
+	branch = uwiki
