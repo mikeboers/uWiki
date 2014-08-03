@@ -2,3 +2,7 @@
 	path = lib/PyHAML
 	url = git@github.com:mikeboers/PyHAML
 	branch = uwiki
+[submodule "lib/Flask-ACL"]
+	path = lib/Flask-ACL
+	url = git@github.com:mikeboers/Flask-ACL
+	branch = uwiki
