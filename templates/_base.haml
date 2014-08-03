@@ -32,7 +32,7 @@
             +self.breadcrumb_head
 
             %li
-                %a.logo(href='/') uWiki
+                %a.logo(href='/')&= config.get('SITE_TITLE', 'uWiki')
 
             @breadcrumb
             +self.breadcrumb
