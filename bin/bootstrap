@@ -5,13 +5,6 @@
 # to make sure everything is in place.
 
 # Create a Python virtual environment, and drop into it.
-VENV="$(pwd)/var/venv-$(uname)-$(arch)"
-if [[ ! -e $VENV/bin/python ]]
-then
-    mkdir -p $VENV
-    python2.7 vendor/virtualenv-1.9.1/virtualenv.py --no-site-packages --distribute $VENV
-fi
-
 . bin/activate
 
 # Install requirements.
