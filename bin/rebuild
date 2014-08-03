@@ -9,7 +9,6 @@ echo Creating user: $(whoami)
 uwiki-user -p password $(whoami)
 
 echo Creating initial pages
-for page in etc/pages/*; do
-    echo $(basename $page)
-    uwiki-page edit $(basename $page) < $page
-done
+uwiki-page --public edit Index < etc/pages/Index
+uwiki-page --public edit Markdown < etc/pages/Markdown
+uwiki-page edit Private < etc/pages/Private

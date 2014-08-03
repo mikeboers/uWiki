@@ -15,10 +15,10 @@ def provide_user():
     return dict(user=current_user)
 
 
-@app.before_request
-def assert_logged_in():
-    if not current_user.is_authenticated() and request.endpoint not in ('login', 'static'):
-        return app.login_manager.unauthorized()
+# @app.before_request
+# def assert_logged_in():
+#     if not current_user.is_authenticated() and request.endpoint not in ('login', 'static'):
+#         return app.login_manager.unauthorized()
 
 
 class Role(object):
