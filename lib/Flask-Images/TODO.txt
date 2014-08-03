@@ -1,2 +1,0 @@
-- Integrate pngcrush.
-- Investigate using a Blueprint.

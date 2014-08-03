@@ -6,3 +6,7 @@
 	path = lib/Flask-ACL
 	url = git@github.com:mikeboers/Flask-ACL
 	branch = uwiki
+[submodule "lib/Flask-Images"]
+	path = lib/Flask-Images
+	url = git@github.com:mikeboers/Flask-Images
+	branch = uwiki
