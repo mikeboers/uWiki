@@ -10,3 +10,7 @@
 	path = lib/Flask-Images
 	url = git@github.com:mikeboers/Flask-Images
 	branch = uwiki
+[submodule "lib/Flask-Roots"]
+	path = lib/Flask-Roots
+	url = git@github.com:mikeboers/Flask-Roots
+	branch = uwiki
