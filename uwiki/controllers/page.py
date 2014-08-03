@@ -62,8 +62,8 @@ def page(name='Index'):
         if not version:
             abort(404)
     else:
-        version = request.versions[-1] if request.versions else None
-
+        version = page.latest_version
+    
     return render_template('page/read.haml',
         page=page,
         version=version,

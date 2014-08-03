@@ -3,14 +3,19 @@
 %%namespace(name='page_utils', file='./_utils.haml')
 
 @breadcrumb
-    %li =|h page.title if page else name
+    %li
+        &= page.title if page else name
+        - if not page.is_public:
+            %span.glyphicon.glyphicon-eye-close
 
 +page_utils.nav(name)
 
 - if version:
     
-    - if version is not page.versions[-1]:
-        %.alert.alert-warning This is not the most recent version.
+    - if version is not page.latest_version:
+        %.alert.alert-warning
+            %strong This page is out of date.
+            %a(href=url_for('page', name=page.name)) See the most recent version.
 
     #page-content= markdown(version.content)
 

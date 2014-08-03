@@ -3,7 +3,10 @@
 %%namespace(name='page_utils', file='./_utils.haml')
 
 @breadcrumb
-    %li =|h page.title if page else name
+    %li
+        &= page.title if page else name
+        - if not page.is_public:
+            %span.glyphicon.glyphicon-eye-close
 
 +page_utils.nav(name)
 

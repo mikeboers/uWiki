@@ -34,6 +34,10 @@ class Page(db.Model):
         self.name = urlify_name(value)
 
     @property
+    def latest_version(self):
+        return self.versions[-1] if self.versions else None
+    
+    @property
     def content(self):
         return self.versions[-1].content if self.versions else None
 
