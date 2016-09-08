@@ -5,9 +5,9 @@ import shutil
 import bcrypt
 import sqlalchemy as sa
 import werkzeug as wz
-from flask.ext.login import current_user
+from flask_login import current_user
 
-from ..core import app, auth, db
+from ..core import app, db
 from .roleset import RoleSetColumn
 
 

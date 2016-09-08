@@ -2,10 +2,10 @@ import datetime
 
 import sqlalchemy as sa
 import werkzeug as wz
-from flask.ext.login import current_user
-from flask.ext.roots.routing import urlify_name
+from flask_login import current_user
 
 from ..core import app, auth, db
+from ..utils import urlify_name
 
 
 class Page(db.Model):

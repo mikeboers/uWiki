@@ -3,9 +3,6 @@
 APP_BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_ROOT="$(dirname "$APP_BIN")"
 
-export FLASK_ROOT_PATH="$APP_ROOT"
-export FLASK_INSTANCE_PATH="$APP_ROOT/var"
-
 # Create a Python virtual environment.
 export VIRTUAL_ENV="$APP_ROOT/var/venv"
 if [[ ! -e "$VIRTUAL_ENV/bin/python" ]]
@@ -15,20 +12,5 @@ fi
 
 . "$VIRTUAL_ENV/bin/activate"
 
-# Hook in Flask-Roots.
-export PATH="$APP_ROOT/lib/Flask-Roots/bin:$PATH"
-
 # Make this app importable everywhere.
 export PYTHONPATH="$PYTHONPATH:$APP_ROOT"
-
-# Ruby gems.
-export GEM_HOME="$VIRTUAL_ENV"
-export GEM_PATH=""
-
-# Node packages.
-export NPM_CONFIG_GLOBAL="true"
-export NPM_CONFIG_PREFIX="$VIRTUAL_ENV"
-
-# Bower packages.
-export bower_cwd="$VIRTUAL_ENV"
-export bower_directory="lib/bower"

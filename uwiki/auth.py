@@ -1,7 +1,7 @@
 import logging
 
 from flask import request
-from flask.ext.login import current_user, UserMixin, AnonymousUserMixin
+from flask_login import current_user, UserMixin, AnonymousUserMixin
 
 from .core import app, auth
 
