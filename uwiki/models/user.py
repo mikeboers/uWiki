@@ -33,7 +33,7 @@ class User(db.Model):
         self.password_hash = bcrypt.hashpw(password, bcrypt.gensalt())
 
     def check_password(self, password):
-        return self.password_hash and bcrypt.checkpw(password, self.password_hash)
+        return self.password_hash and bcrypt.checkpw(str(password), str(self.password_hash))
 
     @property
     def is_authenticated(self):

@@ -1,6 +1,5 @@
 %%inherit(file="/_base.haml")/
 
-
 <h1>${status.code}!</h1>
 <h2>${status.name|h}</h2>
 
@@ -11,9 +10,9 @@
 
 <p>
     <span class="cute">That is all I know.</span>
-    <a href="mailto:webstatus@mikeboers.com?subject=${"%s on %s" % (status.code, request.environ.get('SERVER_NAME'))}">
-        Feel free to tell me more.
-    </a>
+    ##<a href="mailto:webstatus@mikeboers.com?subject=${"%s on %s" % (status.code, request.environ.get('SERVER_NAME'))}">
+    ##    Feel free to tell me more.
+    ##</a>
 </p>
 
 - if traceback:

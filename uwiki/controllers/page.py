@@ -37,12 +37,12 @@ def page(name='Index'):
         return redirect(url_for('page', name=page.name))
 
     if request.args.get('action') == 'history':
-        if not current_user.is_authenticated():
+        if not current_user.is_authenticated:
             return app.login_manager.unauthorized()
         return render_template('page/history.haml', name=name, page=page)
 
     if request.args.get('action') == 'edit':
-        if not current_user.is_authenticated():
+        if not current_user.is_authenticated:
             return app.login_manager.unauthorized()
 
         form = PageForm(request.form, page)

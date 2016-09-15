@@ -5,9 +5,9 @@ from flask_login import LoginManager
 from flask_mako import MakoTemplates, TemplateError
 from flask_sqlalchemy import SQLAlchemy
 from flask_acl import ACLManager
-from .markdown import markdown
-
 import haml
+
+from .markdown import markdown
 
 
 app = Flask(__name__)

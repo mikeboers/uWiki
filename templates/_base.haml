@@ -22,7 +22,7 @@
 
     %title uWiki
 
-%body(class_='view-' + request.endpoint, dataEndpoint=request.endpoint)
+%body(class_='view-' + (request.endpoint or 'error'), dataEndpoint=request.endpoint)
 
     #root.container
         

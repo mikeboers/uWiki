@@ -12,4 +12,4 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False # Soon to be default behaviour.
 
 # TODO: Set this better.
 SECRET_KEY = 'monkey'
-
+DEBUG = True
