@@ -78,13 +78,15 @@ extension_constructors = dict(
 
 
 extension_usage_defaults = {
-    'nl2br': True,
-    'codehilite': True,
-    'mathjax': True,
-    'markdown_escape': False,
     'abbr': True,
-    'footnotes': True,
+    'codehilite': True,
+    'def_list': True,
     'fenced_code': True, 
+    'footnotes': True,
+    'markdown_escape': False,
+    'mathjax': True,
+    'nl2br': True,
+    'tables': True,
     'toc': True,
     'wikilinks(base_url=/wiki/,end_url=)': True,
 }
