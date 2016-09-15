@@ -24,7 +24,7 @@
 
 %body(class_='view-' + (request.endpoint or 'error'), dataEndpoint=request.endpoint)
 
-    #root.container
+    #body-content.container
         
         %ol#primary-breadcrumb.breadcrumb
 
@@ -38,8 +38,6 @@
             +self.breadcrumb
 
         = next.body()
-
-        #root-footer
 
     #footer.container
         %%include(file='_footer.haml')
