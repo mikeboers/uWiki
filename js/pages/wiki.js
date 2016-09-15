@@ -1,6 +1,6 @@
+
 app.endpoint_handler('page', function() {
     
-
     var textarea = $('#content');
     var editdiv = $('<div>').css({minHeight: '200px'}).insertBefore(textarea);
     textarea.hide();

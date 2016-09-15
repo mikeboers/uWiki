@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+import os
+import sys
+
+import jsmin
+
+root = 'js'
+cache = {}
+
+def rewrite(path):
+
+    if path in cache:
+        return cache[path]
+    cache['path'] = '// RECURSION in ' + path
+
+    output = []
+    did_require_self = False
+    lines = list(open(path))
+
+    for li, line in enumerate(lines):
+        
+        if not did_require_self:
+            output.append(line)
+
+        parts = line.strip().split(None, 2)
+        if not parts or parts[0] != '//=':
+            continue
+
+        if parts[1] == 'require_self':
+            output.extend(lines[li + 1:])
+            did_require_self = True
+
+        elif parts[1] == 'require':
+            for ext in '', '.js':
+                sub_path = os.path.join(root, parts[2] + ext)
+                if os.path.exists(sub_path):
+                    output.append(rewrite(sub_path))
+                    break
+            else:
+                print >> sys.stderr, 'could not find:', parts[1:]
+        
+        else:
+            print >> sys.stderr, 'unknown directive:', parts[1:]
+
+    cache[path] = res = ''.join(output)
+    return res
+
+
+out_dir = 'var/static/js'
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
+
+
+for name in 'lib.js', 'main.js':
+    print name
+    res = rewrite(os.path.join(root, name))
+
+    base, ext = os.path.splitext(name)
+    assert ext == '.js'
+    out_name = base + '.min.js'
+
+    with open(os.path.join(out_dir, out_name), 'w') as fh:
+        fh.write(res)
