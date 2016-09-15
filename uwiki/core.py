@@ -1,6 +1,9 @@
-import os
+from __future__ import absolute_import
 
-from flask import Flask
+import os
+import hashlib
+
+from .flask import Flask
 from flask_login import LoginManager
 from flask_mako import MakoTemplates, TemplateError
 from flask_sqlalchemy import SQLAlchemy
@@ -24,22 +27,38 @@ app.config['MAKO_MODULE_DIRECTORY'] = os.path.join(app.instance_path, 'mako')
 mako = MakoTemplates(app)
 
 
+
+_static_etags = {}
+
+def static(file_name):
+
+    file_name = file_name.strip('/')
+
+    # Serve out of 'static' and 'var/static'.
+    for dir_name in 'static', 'var/static':
+        file_path = os.path.join(app.root_path, dir_name, file_name)
+        if os.path.exists(file_path):
+            mtime = os.path.getmtime(file_path)
+            if file_path not in _static_etags or _static_etags[file_path][0] != mtime:
+                hash_ = hashlib.sha1(open(file_path).read()).hexdigest()[:8]
+                _static_etags[file_path] = (mtime, hash_)
+            return '/%s?e=%s' % (file_name, _static_etags[file_path][1])
+
+    return '/' + file_name
+
+
 @app.context_processor
 def add_helpers():
-    
-    def static(x):
-        return x
-
     return {
         'static': static,
         'markdown': markdown,
     }
 
 
-@app.errorhandler(TemplateError)
-def handle_mako_error(e):
-    # TODO: Do better.
-    return str(e.text), 500, [('Content-Type', 'text/plain')]
+# @app.errorhandler(TemplateError)
+# def handle_mako_error(e):
+#     # TODO: Do better.
+#     return str(e.text), 500, [('Content-Type', 'text/plain')]
 
 
 login_manager = LoginManager(app)
