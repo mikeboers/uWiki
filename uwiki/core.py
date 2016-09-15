@@ -5,7 +5,7 @@ from flask_login import LoginManager
 from flask_mako import MakoTemplates, TemplateError
 from flask_sqlalchemy import SQLAlchemy
 from flask_acl import ACLManager
-from markdown import Markdown
+from .markdown import markdown
 
 import haml
 
@@ -23,23 +23,18 @@ app.config['MAKO_PREPROCESSOR'] = haml.preprocessor
 app.config['MAKO_MODULE_DIRECTORY'] = os.path.join(app.instance_path, 'mako')
 mako = MakoTemplates(app)
 
+
 @app.context_processor
 def add_helpers():
     
     def static(x):
         return x
 
-    def markdown(text):
-
-        md = Markdown(#extensions=loaded_extensions,
-                      safe_mode=False, 
-                      output_format='xhtml')
-        return md.convert(text)
-
     return {
         'static': static,
         'markdown': markdown,
     }
+
 
 @app.errorhandler(TemplateError)
 def handle_mako_error(e):
