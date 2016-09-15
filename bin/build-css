@@ -1,5 +1,14 @@
 #!/bin/bash
 
 mkdir -p var/static/css
-sassc.py -I css css/screen.sass > var/static/css/screen.css
 
+for name in screen; do
+    echo css/$name.sass
+    sassc.py -I css css/$name.sass > var/static/css/$name.css
+done
+
+case "$1" in
+    -w|--watch)
+        watchmedo shell-command -R -c "$0" -p "*.sass" css
+        ;;
+esac

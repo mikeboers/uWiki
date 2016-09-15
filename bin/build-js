@@ -8,6 +8,7 @@ import jsmin
 root = 'js'
 cache = {}
 
+
 def rewrite(path):
 
     if path in cache:
@@ -39,7 +40,7 @@ def rewrite(path):
                     break
             else:
                 print >> sys.stderr, 'could not find:', parts[1:]
-        
+
         else:
             print >> sys.stderr, 'unknown directive:', parts[1:]
 
@@ -47,18 +48,26 @@ def rewrite(path):
     return res
 
 
-out_dir = 'var/static/js'
-if not os.path.exists(out_dir):
-    os.makedirs(out_dir)
+
+def main():
+
+    out_dir = 'var/static/js'
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    for name in ['main.js']:
+        print name
+        res = rewrite(os.path.join(root, name))
+
+        base, ext = os.path.splitext(name)
+        assert ext == '.js'
+        out_name = base + '.min.js'
+
+        with open(os.path.join(out_dir, out_name), 'w') as fh:
+            fh.write(res)
 
 
-for name in 'lib.js', 'main.js':
-    print name
-    res = rewrite(os.path.join(root, name))
+main()
 
-    base, ext = os.path.splitext(name)
-    assert ext == '.js'
-    out_name = base + '.min.js'
-
-    with open(os.path.join(out_dir, out_name), 'w') as fh:
-        fh.write(res)
+if len(sys.argv) > 1 and sys.argv[1] in ('-w', '--watch'):
+    os.system('watchmedo shell-command -R -c %s -p "*.js" js' % sys.argv[0])
