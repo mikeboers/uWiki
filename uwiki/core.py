@@ -8,14 +8,9 @@ import haml
 
 
 app = Flask(__name__)
-app.root_path = os.path.abspath(os.path.join(__file__, '..', '..'))
-app.instance_path = os.path.join(app.root_path, 'var')
-
-# TODO: config here
+app.config.from_object('uwiki.config')
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.instance_path, 'db.sqlite')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Soon to be default behaviour.
 db = SQLAlchemy(app)
 db.metadata.bind = db.engine # I need to bind this for whatever reason.
 
