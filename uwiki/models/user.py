@@ -35,14 +35,17 @@ class User(db.Model):
     def check_password(self, password):
         return self.password_hash and bcrypt.checkpw(password, self.password_hash)
 
+    @property
     def is_authenticated(self):
         """For Flask-Login."""
         return True
 
+    @property
     def is_active(self):
         """For Flask-Login."""
         return True
 
+    @property
     def is_anonymous(self):
         """For Flask-Login."""
         return False

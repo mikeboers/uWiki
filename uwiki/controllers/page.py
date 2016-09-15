@@ -1,7 +1,8 @@
+from flask_login import current_user, login_required
+from flask_wtf import Form
 import wtforms as wtf
-from flask.ext.wtf import Form
-from flask.ext.roots.routing import urlify_name
-from flask.ext.login import current_user, login_required
+
+from uwiki.utils import urlify_name
 
 from . import *
 
@@ -28,7 +29,7 @@ def page(name='Index'):
     page = Page.query.filter(Page.name.like(name)).first()
 
     # Make sure private pages stay that way.
-    if not current_user.is_authenticated() and (not page or not page.is_public):
+    if not current_user.is_authenticated and (not page or not page.is_public):
         abort(404)
 
     # Assert we are on the normalized page.

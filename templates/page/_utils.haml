@@ -2,7 +2,7 @@
 @nav(name, active=None)
 
     -
-        if not current_user.is_authenticated():
+        if not current_user.is_authenticated:
             return ''
 
     - active = active or request.args.get('action', '')

@@ -13,8 +13,10 @@ Flask-Mako
 mako
 -e lib/PyHAML
 libsass
+Markdown
 
 Flask-Login
+-e lib/Flask-ACL
 bcrypt
 
 Pygments
@@ -22,7 +24,8 @@ Pygments
 #gevent
 #gunicorn
 
-
+Flask-WTF
+wtforms
 
 
 

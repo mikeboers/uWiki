@@ -4,7 +4,7 @@ import sqlalchemy as sa
 import werkzeug as wz
 from flask_login import current_user
 
-from ..core import app, auth, db
+from ..core import app, db
 from ..utils import urlify_name
 
 

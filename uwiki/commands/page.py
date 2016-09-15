@@ -5,11 +5,11 @@ import sys
 from argparse import ArgumentParser
 
 import sqlalchemy as sa
-from flask.ext.roots.routing import urlify_name
-from flask.ext.login import login_user
+from flask_login import login_user
 
-from ..core import app, db
-from ..models import User, Page, PageContent
+from uwiki.core import app, db
+from uwiki.models import User, Page, PageContent
+from uwiki.utils import urlify_name
 
 
 def main():

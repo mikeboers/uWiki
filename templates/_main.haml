@@ -4,7 +4,7 @@
 
 @breadcrumb_head
 
-    - if current_user.is_authenticated():
+    - if current_user.is_authenticated:
         %.pull-right
             %strong &= current_user.name
 

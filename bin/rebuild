@@ -1,14 +1,13 @@
 #!/bin/bash
 
 echo Rebuilding database
-rm -rf var/sqlite
-mkdir -p var/sqlite
-migrate
+rm -rf var/db.sqlite
+uwiki-migrate || exit $?
 
 echo Creating user: $(whoami)
-uwiki-user -p password $(whoami)
+uwiki-user -p password $(whoami)  || exit $?
 
 echo Creating initial pages
-uwiki-page --public edit Index < etc/pages/Index
-uwiki-page --public edit Markdown < etc/pages/Markdown
-uwiki-page edit Private < etc/pages/Private
+uwiki-page --public edit Index < etc/pages/Index || exit $?
+uwiki-page --public edit Markdown < etc/pages/Markdown || exit $?
+uwiki-page edit Private < etc/pages/Private || exit $?
