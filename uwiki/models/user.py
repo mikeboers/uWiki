@@ -20,6 +20,7 @@ class User(db.Model):
     )
     
     roles = RoleSetColumn()
+    ldap_groups = RoleSetColumn()
 
     def __repr__(self):
         return '<%s %s>' % (
@@ -29,6 +30,10 @@ class User(db.Model):
 
     # User stuff:
 
+    @property
+    def is_local(self):
+        return self.password_hash and self.password_hash.startswith('$')
+    
     def set_password(self, password):
         self.password_hash = bcrypt.hashpw(password, bcrypt.gensalt())
 

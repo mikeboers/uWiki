@@ -5,8 +5,8 @@
 @breadcrumb
     %li
         &= page.title if page else name
-        - if page and not page.is_public:
-            %span.glyphicon.glyphicon-eye-close
+        ##- if page and not page.is_public:
+        ##    %span.glyphicon.glyphicon-eye-close
 
 +page_utils.nav(name)
 

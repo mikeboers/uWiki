@@ -5,8 +5,8 @@
 @breadcrumb
     %li
         &= page.title if page else name
-        - if not page.is_public:
-            %span.glyphicon.glyphicon-eye-close
+        ##- if not page.is_public:
+        ##    %span.glyphicon.glyphicon-eye-close
 
 +page_utils.nav(name)
 
@@ -14,9 +14,10 @@
 
 
 - if page and page.versions:
-    %ul - for version in reversed(page.versions):
-        %li %a(href=url_for('page', name=name, version=version.id))
-            ${version.created_at.strftime('%Y-%m-%d %H:%M:%S')}
+    %ul - for vi, version in reversed(list(enumerate(page.versions))):
+        %li %a(href=url_for('page', name=name, version_id=version.id))
+            v${vi + 1}
+            at ${version.created_at.strftime('%Y-%m-%d %H:%M:%S')}
             by
             %em
                 ${version.creator.display_name|h}

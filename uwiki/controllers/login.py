@@ -25,15 +25,23 @@ def get_authn_user(username, password):
 
     user = User.query.filter_by(name=username).first()
 
-    if user and user.password_hash:
+    if user and user.is_local:
         if user.check_password(password):
             return user
+        return
+
+    if user and user.password_hash != 'ldap':
         return
 
     if not app.config['LDAP_URL']:
         return
 
-    import ldap
+    try:
+        import ldap
+    except ImportError:
+        flash('LDAP authentication is configured, but the libraries are not installed.', 'danger')
+        return
+
     con = ldap.initialize(app.config['LDAP_URL'])
     con.set_option(ldap.OPT_NETWORK_TIMEOUT, 2)
     user_dn = app.config['LDAP_USER_DN'] % username
@@ -42,16 +50,17 @@ def get_authn_user(username, password):
     except ldap.INVALID_CREDENTIALS:
         return
     except ldap.SERVER_DOWN:
-        flash('LDAP server appears to be down.', 'danger')
+        flash('LDAP server is not responding; cannot continue.', 'danger')
         return
 
     # We need to create the user if the don't already exist.
     existed = bool(user)
     if not user:
-        user = User(name=username, password_hash='')
+        user = User(name=username, password_hash='ldap')
         db.session.add(user)
 
-    user_search_res = con.search_s(user_dn, ldap.SCOPE_SUBTREE, attrlist=['gidNumber'])
+    user_search_res = con.search_s(user_dn, ldap.SCOPE_SUBTREE, attrlist=['cn', 'gidNumber'])
+    user_common_name = user_search_res[0][1]['cn'][0]
     user_primary_gid = user_search_res[0][1]['gidNumber'][0]
     group_search_res = con.search_s('ou=group,dc=mm', ldap.SCOPE_ONELEVEL,
         filterstr='(&(objectClass=posixGroup)(|(memberUid=%s)(gidNumber=%s)))' % (username, user_primary_gid),
@@ -62,8 +71,17 @@ def get_authn_user(username, password):
         group_name = group['cn'][0]
         all_groups.append(group_name)
 
-    if sorted(user.roles or ()) != sorted(all_groups or ()):
-        user.roles = all_groups
+    changed = False
+
+    if user.display_name != user_common_name:
+        user.display_name = user_common_name
+        changed = True
+
+    if sorted(user.ldap_groups or ()) != sorted(all_groups or ()):
+        user.ldap_groups = all_groups
+        changed = True
+
+    if changed:
         db.session.commit()
 
     return user
@@ -86,9 +104,8 @@ def login():
             return redirect(request.args.get("next") or url_for("index"))
 
         if not user:
-
-            # Make it take a uniform amount of time to get the password
-            # wrong, or for LDAP to not exist.
+            # Take a uniform amount of time to get the password wrong,
+            # or for LDAP to not exist.
             to_sleep = start_time + 3 - time.time()
             if to_sleep > 0:
                 time.sleep(to_sleep)

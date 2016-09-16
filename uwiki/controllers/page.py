@@ -11,8 +11,8 @@ class PageForm(Form):
 
     title = wtf.TextField(validators=[wtf.validators.Required()])
     content = wtf.TextAreaField(validators=[wtf.validators.Required()])
-    is_public = wtf.BooleanField('Public can read this page.')
-    acl = wtf.TextField('Access Control List', validators=[wtf.validators.Required()])
+    #is_public = wtf.BooleanField('Public can read this page.')
+    #acl = wtf.TextField('Access Control List', validators=[wtf.validators.Required()])
 
 
 @app.route('/wiki/')
@@ -30,11 +30,11 @@ def page(name='Index'):
     page = Page.query.filter(Page.name.like(name)).first()
 
     # Make sure private pages stay that way.
-    if not authz.can('read', page):
-        if 'netwheel' in getattr(current_user, 'roles', ()):
-            flash('ACL does not permit you access to this page.', 'danger')
-        else:
-            abort(404)
+    # if not authz.can('read', page):
+    #     if 'netwheel' in getattr(current_user, 'roles', ()):
+    #         flash('ACL does not permit you access to this page.', 'danger')
+    #     else:
+    #         abort(404)
     # if not current_user.is_authenticated and (not page or not page.is_public):
         # abort(404)
 
@@ -65,8 +65,8 @@ def page(name='Index'):
 
         return render_template('page/edit.haml', name=name, page=page, form=form)
 
-    if 'version' in request.args:
-        version = next((version for version in page.versions if version.id == int(request.args['version'])), None)
+    if 'version_id' in request.args:
+        version = next((version for version in page.versions if version.id == int(request.args['version_id'])), None)
         if not version:
             abort(404)
     else:
