@@ -12,6 +12,7 @@ class PageForm(Form):
     title = wtf.TextField(validators=[wtf.validators.Required()])
     content = wtf.TextAreaField(validators=[wtf.validators.Required()])
     is_public = wtf.BooleanField('Public can read this page.')
+    acl = wtf.TextField('Access Control List', validators=[wtf.validators.Required()])
 
 
 @app.route('/wiki/')
@@ -29,14 +30,20 @@ def page(name='Index'):
     page = Page.query.filter(Page.name.like(name)).first()
 
     # Make sure private pages stay that way.
-    if not current_user.is_authenticated and (not page or not page.is_public):
-        abort(404)
+    if not authz.can('read', page):
+        if 'netwheel' in getattr(current_user, 'roles', ()):
+            flash('ACL does not permit you access to this page.', 'danger')
+        else:
+            abort(404)
+    # if not current_user.is_authenticated and (not page or not page.is_public):
+        # abort(404)
 
     # Assert we are on the normalized page.
     if page and page.name != name:
         return redirect(url_for('page', name=page.name))
 
     if request.args.get('action') == 'history':
+        # Only authorized users.
         if not current_user.is_authenticated:
             return app.login_manager.unauthorized()
         return render_template('page/history.haml', name=name, page=page)

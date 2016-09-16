@@ -1,4 +1,5 @@
 import datetime
+import re
 
 import sqlalchemy as sa
 import werkzeug as wz
@@ -44,6 +45,42 @@ class Page(db.Model):
     @content.setter
     def content(self, value):
         self.versions.append(PageContent(content=value))
+
+    @property
+    def __acl__(self):
+        acl = []
+        for ace in re.split(r'[,.:;]+', self.acl or ''):
+            ace = ace.strip()
+            parts = ace.split()
+            if len(parts) == 3:
+                acl.append(parts)
+            m = re.match(r'^(\w+)([+=-])(\w+)$', ace)
+            if m:
+                role, mod, perms = m.groups()
+                perms = {
+                    'r': ['read'],
+                    'w': ['write'],
+                    'rw': ['read', 'write'],
+                    'wr': ['read', 'write'],
+                }.get(perms, [perms])
+                for perm in perms:
+                #     print role, mod, perms
+                    if role.lower() in ('any', 'all', '*'):
+                        pred = 'ANY'
+                    else:
+                        pred = lambda user, **kw: user.is_authenticated and (
+                            user.name == role or
+                            user.roles and role in user.roles
+                        )
+                    acl.append((
+                        'Deny' if '-' in mod else 'Allow',
+                        pred,
+                        perm
+                    ))
+        acl.append('DENY ANY ALL')
+        for ace in acl:
+            print ace
+        return acl
 
 
 class PageContent(db.Model):
