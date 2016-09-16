@@ -19,23 +19,26 @@ def main():
     arg_parser.add_argument('-a', '--append', action='store_true')
 
     arg_parser.add_argument('-r', '--role', dest='roles', action='append')
+    arg_parser.add_argument('-g', '--group', dest='groups', action='append')
 
+    arg_parser.add_argument('-n', '--name', metavar="DISPLAYNAME", dest='display_name')
     arg_parser.add_argument('-e', '--email')
 
     arg_parser.add_argument('-p', '--password')
     arg_parser.add_argument('--nopassword', action='store_true')
+    arg_parser.add_argument('--ldap', action='store_true')
 
-    arg_parser.add_argument('name', nargs='+')
+    arg_parser.add_argument('usernames', metavar="NAME", nargs='+')
 
     args = arg_parser.parse_args()
 
-    for name in args.name:
+    for name in args.usernames:
 
         users = list(User.query.filter(sa.func.glob(name, User.name)).all())
 
         if args.list:
-            for account in users:
-                print account.name
+            for user in users:
+                print user.name
             continue
 
         if not users:
@@ -44,34 +47,43 @@ def main():
             if args.delete:
                 continue
 
-            account = User(name=name)
-            db.session.add(account)
-            users = [account]
+            user = User(name=name, display_name=name)
+            db.session.add(user)
+            users = [user]
         
-        for account in users:
-            process_account(account, args)
+        for user in users:
+            process_user(user, args)
 
 
-def process_account(account, args):
+def process_user(user, args):
 
     if args.delete:
-        if account:
-            db.session.delete(account)
+        if user:
+            db.session.delete(user)
             db.session.commit()
         return
 
+    if args.display_name:
+        user.display_name = args.display_name
     if args.password:
-        account.set_password(args.password)
+        user.set_password(args.password)
     if args.nopassword:
-        account.password_hash = None
-        
+        user.password_hash = None
+    if args.ldap:
+        user.password_hash = 'ldap'
+
     if args.email:
-        account.email = args.email
+        user.email = args.email
 
     if args.roles:
         if not args.append:
-            account.roles = set()
-        account.roles.update(args.roles)
+            user.roles = set()
+        user.roles.update(args.roles)
+
+    if args.groups:
+        if not args.append:
+            user.ldap_groups = set()
+        user.ldap_groups.update(args.groups)
 
     db.session.commit()
 
@@ -84,11 +96,11 @@ def do_list(names):
     else:
         users = User.query.all()
 
-    for i, account in enumerate(users):
+    for i, user in enumerate(users):
         if i:
             print '---'
-        print account.name
-        print 'roles:', ', '.join(account.roles) or '<none>'
-        print 'home:', account.home.name if account.home else '<none>'
-        print 'groups:', ', '.join(m.group.name + ('(admin)' if m.is_admin else '') for m in account.memberships) or '<none>'
+        print user.name
+        print 'roles:', ', '.join(user.roles) or '<none>'
+        print 'home:', user.home.name if user.home else '<none>'
+        print 'groups:', ', '.join(m.group.name + ('(admin)' if m.is_admin else '') for m in user.memberships) or '<none>'
 

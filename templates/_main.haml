@@ -6,10 +6,14 @@
 
     - if current_user.is_authenticated:
         %.pull-right
-            %strong &= current_user.name
+        
+            %strong
+                &= current_user.display_name
+                %small (${current_user.name|h})
 
             .btn-group.btn-group-xs
-                - if any(role in current_user.roles for role in ('wheel', 'observer')):
+
+                - if any(role in current_user.roles for role in ('root', 'wheel', 'observer')):
                     %a.btn.btn-primary(href='#')
                         +utils.icon('cog')
                         Admin
