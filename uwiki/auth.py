@@ -10,6 +10,10 @@ from .core import app, authn, authz
 log = logging.getLogger(__name__)
 
 
+class ACL(str):
+    @property
+    def __acl__(self):
+        return self
 
 class Role(object):
     def __init__(self, name):

@@ -4,6 +4,7 @@ import wtforms as wtf
 
 from uwiki.utils import urlify_name
 
+from uwiki.auth import ACL
 from . import *
 
 
@@ -63,11 +64,16 @@ def page(name='Index'):
     page = Page.query.filter(Page.name.like(name)).first()
 
     # Make sure private pages stay that way.
-    if not authz.can('page.read', page):
+    if page and not authz.can('page.read', page):
         if authz.can('page.list', page):
             abort(403)
         else:
             abort(404)
+
+    # If it doesn't exist, don't let non-users see the page.
+    if not page and not authz.can('page.create', ACL('ALLOW AUTHENTICATED ALL')):
+        print 'HERE'
+        abort(404)
 
     # Assert we are on the normalized page.
     if page and page.name != name:
@@ -79,11 +85,11 @@ def page(name='Index'):
 
     if request.args.get('action') == 'edit':
 
-        if not authz.can('page.write', page):
+        if page and not authz.can('page.write', page):
             return app.login_manager.unauthorized()
 
-        is_admin = authz.can('page.admin', page)
-        is_owner = page.owner == current_user # current_user is a proxy, so "is" would fail
+        is_admin = authz.can('page.admin', page) if page else authz.can('page.admin', ACL('ALLOW WHEEL ALL'))
+        is_owner = not page or page.owner == current_user # current_user is a proxy, so "is" would fail
 
         if is_admin:
             form = AdminPageForm(request.form, page)
