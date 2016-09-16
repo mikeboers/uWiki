@@ -1,10 +1,20 @@
 
-- redirects are created whenever you change the path
-    - redirects are simply a Page with redirect=new_path
+- Titles should be able to have whatever does not need to be escaped
+- PageURL which is what is first consulted to resolve pages
+    page_id
+    slug
+    created_at
+
+    Page.primary_url_id
 
 - table of contents from headers
+    [[ INDEX -R ]]
 
-- uploading assets
+    We should consider a rst-like syntax: .. index
+
+- uploading assets to /media
+
   - image resizing
 
-- make sure we have the most recent Flask-Roots, PyHAML, etc..
+- preserve permissions in page versions
+    - either in a metadata field, or in actual fields
