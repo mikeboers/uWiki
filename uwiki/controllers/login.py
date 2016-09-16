@@ -33,10 +33,14 @@ def get_authn_user(username, password):
 
     import ldap
     con = ldap.initialize(app.config['LDAP_URL'])
+    con.set_option(ldap.OPT_NETWORK_TIMEOUT, 3)
     user_dn = app.config['LDAP_USER_DN'] % username
     try:
         con.simple_bind_s(user_dn, password)
     except ldap.INVALID_CREDENTIALS:
+        return
+    except ldap.SERVER_DOWN:
+        flash('LDAP server appears to be down.', 'danger')
         return
 
     # We need to create the user if the don't already exist.
