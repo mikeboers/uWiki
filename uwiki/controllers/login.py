@@ -19,6 +19,51 @@ class LoginForm(Form):
 
 
 
+def get_authn_user(username, password):
+
+    user = User.query.filter_by(name=username).first()
+
+    if user and user.password_hash:
+        if user.check_password(password):
+            return user
+        return
+
+    if not app.config['LDAP_URL']:
+        return
+
+    import ldap
+    con = ldap.initialize(app.config['LDAP_URL'])
+    user_dn = app.config['LDAP_USER_DN'] % username
+    try:
+        con.simple_bind_s(user_dn, password)
+    except ldap.INVALID_CREDENTIALS:
+        return
+
+    # We need to create the user if the don't already exist.
+    existed = bool(user)
+    if not user:
+        user = User(name=username, password_hash='')
+        db.session.add(user)
+
+    user_search_res = con.search_s(user_dn, ldap.SCOPE_SUBTREE, attrlist=['gidNumber'])
+    user_primary_gid = user_search_res[0][1]['gidNumber'][0]
+    group_search_res = con.search_s('ou=group,dc=mm', ldap.SCOPE_ONELEVEL,
+        filterstr='(&(objectClass=posixGroup)(|(memberUid=%s)(gidNumber=%s)))' % (username, user_primary_gid),
+        attrlist=['cn'],
+    )
+    all_groups = []
+    for group_dn, group in group_search_res:
+        group_name = group['cn'][0]
+        all_groups.append(group_name)
+
+    if sorted(user.roles or ()) != sorted(all_groups or ()):
+        user.roles = all_groups
+        db.session.commit()
+
+    return user
+
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -26,14 +71,14 @@ def login():
 
     if form.validate_on_submit():
 
-        user = User.query.filter_by(name=form.username.data).first()
-        if user and user.check_password(form.password.data):
-
+        user = get_authn_user(form.username.data, form.password.data)
+        
+        if user:
             login_user(user, remember=True)
-            flash("Logged in successfully.")
+            flash("Logged in as %s." % form.username.data)
             return redirect(request.args.get("next") or url_for("index"))
 
-        else:
+        if not user:
             flash("Username and password did not match.", 'warning')
 
     return render_template("login.haml", form=form)
