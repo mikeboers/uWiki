@@ -52,6 +52,7 @@ def add_helpers():
     return {
         'static': static,
         'markdown': markdown,
+        'authz': authz,
     }
 
 
@@ -61,8 +62,10 @@ def add_helpers():
 #     return str(e.text), 500, [('Content-Type', 'text/plain')]
 
 
-login_manager = LoginManager(app)
-auth = ACLManager(app)
+authn = LoginManager(app)
+authn.login_view = 'login'
+
+authz = ACLManager(app)
 
 
 

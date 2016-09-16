@@ -4,12 +4,12 @@ import wtforms as wtf
 from flask_wtf import Form
 from flask_login import login_user, login_required, logout_user
 
-from ..core import login_manager
+from ..core import authn
 
 from . import *
 
 
-@login_manager.user_loader
+@authn.user_loader
 def load_user(userid):
     return User.query.filter_by(name=userid).first()
 

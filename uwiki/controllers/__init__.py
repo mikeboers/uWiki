@@ -5,11 +5,11 @@ from flask import request, abort, flash, redirect, url_for
 from flask_login import current_user
 from flask_mako import render_template
 
-from ..core import app, db, auth
+from ..core import app, db, authn, authz
 from ..models import User, Page, PageContent
 
 
-requires_root = lambda func: auth.route_acl('''
+requires_root = lambda func: authz.route_acl('''
     ALLOW ROOT ANY
     DENY ALL ANY
 ''')(func)
