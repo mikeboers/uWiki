@@ -5,9 +5,9 @@ rm -rf var/db.sqlite
 uwiki-migrate || exit $?
 
 echo Creating user: $(whoami)
-uwiki-user -p password $(whoami)  || exit $?
+uwiki-user -p password --role wheel $(whoami)  || exit $?
 
 echo Creating initial pages
-uwiki-page --public edit Index < etc/pages/Index || exit $?
-uwiki-page --public edit Markdown < etc/pages/Markdown || exit $?
-uwiki-page edit Private < etc/pages/Private || exit $?
+uwiki-page edit Index < etc/pages/Index || exit $?
+uwiki-page edit Markdown < etc/pages/Markdown || exit $?
+uwiki-page --private edit Private < etc/pages/Private || exit $?

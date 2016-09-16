@@ -6,5 +6,5 @@ def upgrade(engine):
     meta = sa.MetaData(bind=engine)
     meta.reflect()
 
-    col = sa.Column('ldap_groups', sa.String)
+    col = sa.Column('groups', sa.String)
     col.create(meta.tables['users'])

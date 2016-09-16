@@ -12,7 +12,6 @@ import haml
 
 from .markdown import markdown
 
-
 app = Flask(__name__)
 app.config.from_object('uwiki.config')
 app.root_path = app.config['ROOT_PATH']
@@ -70,7 +69,7 @@ authz = ACLManager(app)
 
 
 # Register other components.
-#from . import auth as _auth
+from . import auth as _auth
 from . import models
 
 # Controllers are NOT registered here!

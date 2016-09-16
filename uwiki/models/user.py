@@ -20,7 +20,7 @@ class User(db.Model):
     )
     
     roles = RoleSetColumn()
-    ldap_groups = RoleSetColumn()
+    groups = RoleSetColumn()
 
     def __repr__(self):
         return '<%s %s>' % (

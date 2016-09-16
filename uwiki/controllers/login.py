@@ -77,8 +77,8 @@ def get_authn_user(username, password):
         user.display_name = user_common_name
         changed = True
 
-    if sorted(user.ldap_groups or ()) != sorted(all_groups or ()):
-        user.ldap_groups = all_groups
+    if sorted(user.groups or ()) != sorted(all_groups or ()):
+        user.groups = all_groups
         changed = True
 
     if changed:

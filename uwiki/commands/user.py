@@ -82,8 +82,8 @@ def process_user(user, args):
 
     if args.groups:
         if not args.append:
-            user.ldap_groups = set()
-        user.ldap_groups.update(args.groups)
+            user.groups = set()
+        user.groups.update(args.groups)
 
     db.session.commit()
 

@@ -57,7 +57,7 @@
 
             %label(**{'for': field.label.field_id})
                 &= field.label.text
-                - if flags:
+                - if flags or field.errors:
                     +field_flags(field)
             
             -# if field.type == 'FormField':
@@ -87,4 +87,8 @@
                   if ($.markdownEditor)
                     $(${json('#%s #%s' % (form_id, field.name))}).markdownEditor();
                 })</script>
+
+            - if field.description:
+                %small &= field.description
+            
       

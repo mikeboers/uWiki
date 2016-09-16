@@ -1,5 +1,5 @@
 
-@nav(name, active=None)
+@nav(name, page=None, active=None)
 
     -
         if not current_user.is_authenticated:
@@ -13,5 +13,6 @@
 
     %ul.nav.nav-tabs
         +tab('') Read
-        +tab('edit') Edit
+        - if page is None or authz.can('page.write', page):
+            +tab('edit') Edit
         +tab('history', class_='pull-right') View History

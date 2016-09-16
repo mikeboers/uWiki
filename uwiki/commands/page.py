@@ -27,7 +27,6 @@ def _main():
     arg_parser = ArgumentParser()
 
     arg_parser.add_argument('mode', choices=['get', 'edit', 'list', 'delete'])
-    arg_parser.add_argument('--public', action='store_true')
     arg_parser.add_argument('--private', action='store_true')
     arg_parser.add_argument('title', nargs='*')
 
@@ -68,10 +67,9 @@ def _main():
 
     page = page or Page(title=title)
     page.content = sys.stdin.read()
-    if args.public:
-        page.is_public = True
     if args.private:
-        page.is_public = False
+        page.anon_perms = 'list'
+
     db.session.add(page)
     db.session.commit()
 
