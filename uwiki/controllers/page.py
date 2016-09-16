@@ -19,18 +19,18 @@ def _common_fields():
         ('read', 'Read'),
         ('list', 'None'),
         ('none', 'None & Hidden'),
-    ])
+    ], default='write')
     other_perms = wtf.SelectField('Other User Permissions', choices=[
         ('write', 'Read/Write'),
         ('read', 'Read'),
         ('list', 'None'),
         ('none', 'None & Hidden'),
-    ])
+    ], default='write')
     anon_perms = wtf.SelectField('Anonymous Permissions', choices=[
         ('read', 'Read'),
         ('list', 'None'),
         ('none', 'None & Hidden'),
-    ])
+    ], default='read')
     return group, group_perms, other_perms, anon_perms
 
 class OwnerPageForm(PageForm):

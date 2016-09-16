@@ -41,6 +41,10 @@ class Page(db.Model):
     _title = db.Column('title', db.String)
     owner = db.relationship('User')
 
+    group_perms = db.Column(db.String, default='write')
+    other_perms = db.Column(db.String, default='write')
+    anon_perms = db.Column(db.String, default='read')
+
     def __repr__(self):
         return '<%s %s>' % (
             self.__class__.__name__,
@@ -87,7 +91,7 @@ class Page(db.Model):
                 yield ('Allow', (lambda user, **ctx: user == self.owner), perm)
 
         # The default permissions below need to line up with the defaults
-        # in the PageForm in the page controller, or this won't make sense.
+        # in the schema/Page model/PageForm in the page controller, or this won't make sense.
 
         if self.group and self.group_perms:
             group = GroupPredicate(self.group)
