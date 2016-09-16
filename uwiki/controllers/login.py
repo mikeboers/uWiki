@@ -1,3 +1,5 @@
+import time
+
 import wtforms as wtf
 from flask_wtf import Form
 from flask_login import login_user, login_required, logout_user
@@ -33,7 +35,7 @@ def get_authn_user(username, password):
 
     import ldap
     con = ldap.initialize(app.config['LDAP_URL'])
-    con.set_option(ldap.OPT_NETWORK_TIMEOUT, 3)
+    con.set_option(ldap.OPT_NETWORK_TIMEOUT, 2)
     user_dn = app.config['LDAP_USER_DN'] % username
     try:
         con.simple_bind_s(user_dn, password)
@@ -75,6 +77,7 @@ def login():
 
     if form.validate_on_submit():
 
+        start_time = time.time()
         user = get_authn_user(form.username.data, form.password.data)
         
         if user:
@@ -83,6 +86,13 @@ def login():
             return redirect(request.args.get("next") or url_for("index"))
 
         if not user:
+
+            # Make it take a uniform amount of time to get the password
+            # wrong, or for LDAP to not exist.
+            to_sleep = start_time + 3 - time.time()
+            if to_sleep > 0:
+                time.sleep(to_sleep)
+
             flash("Username and password did not match.", 'warning')
 
     return render_template("login.haml", form=form)
