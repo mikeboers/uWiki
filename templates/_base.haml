@@ -16,11 +16,10 @@
     %script(type="text/x-mathjax-config") MathJax.Hub.Config({messageStyle: "none"})
     %script(src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML")
 
-
-    %script(src=static('/js/lib.min.js'))
+    ## %script(src=static('/js/lib.min.js'))
     %script(src=static('/js/main.min.js'))
 
-    %title uWiki
+    %title&= config['SITE_TITLE']
 
 %body(class_='view-' + (request.endpoint or 'error'), dataEndpoint=request.endpoint)
 
@@ -32,7 +31,7 @@
             +self.breadcrumb_head
 
             %li
-                %a.logo(href='/')&= config.get('SITE_TITLE', 'uWiki')
+                %a.logo(href='/')&= config['SITE_TITLE']
 
             @breadcrumb
             +self.breadcrumb
