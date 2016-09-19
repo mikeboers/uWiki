@@ -2,7 +2,7 @@ from flask_login import current_user, login_required
 from flask_wtf import Form
 import wtforms as wtf
 
-from uwiki.utils import urlify_name
+from uwiki.utils import sluggify_name
 
 from uwiki.auth import ACL
 from . import *
@@ -60,8 +60,8 @@ def page_index():
 @app.route('/wiki/<path:name>', methods=['GET', 'POST'])
 def page(name='Index'):
 
-    name = urlify_name(name)
-    page = Page.query.filter(Page.name.like(name)).first()
+    slug = sluggify_name(name)
+    page = Page.query.filter(Page.name.like(slug)).first()
 
     # Make sure private pages stay that way.
     if page and not authz.can('page.read', page):
@@ -76,12 +76,12 @@ def page(name='Index'):
         abort(404)
 
     # Assert we are on the normalized page.
-    if page and page.name != name:
+    if page and page.name != slug:
         return redirect(url_for('page', name=page.name))
 
     if request.args.get('action') == 'history':
         # TODO: Add a page.history.read perm.
-        return render_template('page/history.haml', name=name, page=page)
+        return render_template('page/history.haml', name=slug, page=page)
 
     if request.args.get('action') == 'edit':
 
@@ -135,7 +135,7 @@ def page(name='Index'):
 
             return redirect(url_for('page', name=page.name))
 
-        return render_template('page/edit.haml', name=name, page=page, form=form)
+        return render_template('page/edit.haml', name=slug, page=page, form=form)
 
     if 'version_id' in request.args:
         # TODO: Add a page.history.read perm.

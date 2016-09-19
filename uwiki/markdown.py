@@ -32,8 +32,10 @@ import cgi
 from flask import current_app
 import markdown as _markdown
 from markdown.extensions.codehilite import CodeHiliteExtension
-
+from markdown.extensions.wikilinks import WikiLinkExtension, WikiLinks
 log = logging.getLogger(__name__)
+
+from .utils import sluggify_name
 
 
 class MathJaxExtension(_markdown.Extension):
@@ -70,10 +72,32 @@ class MarkdownEscapeExtension(_markdown.Extension):
         md.preprocessors.add('markdown_escape', self.Preprocessor(md), '<html_block')
         
 
+class OurWikiLinkExtension(WikiLinkExtension):
+
+    def extendMarkdown(self, md, md_globals):
+
+        # Completely replacing their stuff here.
+        self.md = md
+
+        # append to end of inline patterns
+        WIKILINK_RE = r'\[\[(.+?)\]\]'
+
+        config = self.getConfigs()
+        config['base_url'] = '/wiki/'
+        config['end_url'] = ''
+        config['html_class'] = 'wikilink'
+        config['build_url'] = lambda label, base, end: '%s%s%s' % (base, sluggify_name(label), end)
+
+        wikilinkPattern = WikiLinks(WIKILINK_RE, config)
+        wikilinkPattern.md = md
+        md.inlinePatterns.add('wikilink', wikilinkPattern, "<not_strong")
+
+
 extension_constructors = dict(
     mathjax=MathJaxExtension,
     markdown_escape=MarkdownEscapeExtension,
-    codehilite=lambda: CodeHiliteExtension([('guess_lang', False)])
+    codehilite=lambda: CodeHiliteExtension([('guess_lang', False)]),
+    wikilinks=OurWikiLinkExtension,
 )
 
 
@@ -88,7 +112,7 @@ extension_usage_defaults = {
     'nl2br': True,
     'tables': True,
     'toc': True,
-    'wikilinks(base_url=/wiki/,end_url=)': True,
+    'wikilinks': True,
 }
 
 
@@ -102,6 +126,7 @@ def markdown(text, _unknown=None, **custom_exts):
     ext_prefs = extension_usage_defaults.copy()
     ext_prefs.update(current_app.config.get('MARKDOWN_EXTS', {}))
     ext_prefs.update(custom_exts)
+
     for name, include in ext_prefs.iteritems():
         if include:
             ext = extension_constructors.get(name)

@@ -7,7 +7,7 @@ import werkzeug as wz
 from flask_login import current_user
 
 from ..core import app, db
-from ..utils import urlify_name
+from ..utils import sluggify_name
 from ..auth import Group as GroupPredicate
 
 
@@ -58,7 +58,7 @@ class Page(db.Model):
     @title.setter
     def title(self, value):
         self._title = value
-        self.name = urlify_name(value)
+        self.name = sluggify_name(value)
 
     @property
     def latest_version(self):

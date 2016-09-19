@@ -13,6 +13,7 @@ LDAP_URL = None
 LDAP_USER_DN = 'uid=%s,ou=people,dc=mm'
 LDAP_GROUP_ROOT = 'ou=group,dc=mm'
 
+SITE_TITLE = 'uWiki'
 
 # If there is an instance static config, use it too.
 instance_config = os.path.join(INSTANCE_PATH, 'config.py')
