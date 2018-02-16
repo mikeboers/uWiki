@@ -1,20 +1,20 @@
 
-app.endpoint_handler('page', function() {
-    
-    var textarea = $('#content');
-    var editdiv = $('<div>').css({minHeight: '200px'}).insertBefore(textarea);
-    textarea.hide();
+function setup_ace_editor() {
 
-    var editor = ace.edit(editdiv[0]);
-    editor.setTheme('ace/theme/tomorrow')
+    var $textarea = $('#content');
+    var $editdiv = $('<div>').css({minHeight: '200px'}).insertBefore($textarea);
+    $textarea.hide();
+
+    var editor = ace.edit($editdiv[0]);
+    editor.setTheme('ace/theme/tomorrow');
     
     var session = editor.getSession();
-    session.setValue(textarea.val());
+    session.setValue($textarea.val());
     session.setUseWrapMode(true);
     session.setWrapLimitRange(null, null);
     
-    ace.config.setModuleUrl("mymarkdown", "/js/ace/mymarkdown.js")
-    editor.getSession().setMode('ace/mode/markdown')
+    ace.config.setModuleUrl("mymarkdown", "/js/ace/mymarkdown.js");
+    editor.getSession().setMode('ace/mode/markdown');
 
     editor.setOptions({
         maxLines: Infinity
@@ -27,17 +27,34 @@ app.endpoint_handler('page', function() {
             * editor.renderer.lineHeight
             + editor.renderer.scrollBar.getWidth();
 
-        editdiv.height(newHeight);
+        $editdiv.height(newHeight);
         editor.resize();
 
     }
 
     editor.on('change', resize);
-    resize()
+    resize();
 
-    textarea.closest('form').submit(function() {
-        textarea.val(editor.getSession().getValue());
-    })
+    $textarea.closest('form').submit(function() {
+        $textarea.val(editor.getSession().getValue());
+    });
 
+}
+
+function setup_mde_editor() {
+
+    var $textarea = $('#content');
+    var editor = new SimpleMDE({element: $textarea[0]});
+
+    $textarea.closes('form').submit(function() {
+        $textarea.val(editor.value());
+    });
+
+}
+
+
+app.endpoint_handler('page', function() {
+    
+    setup_mde_editor();
 
 });
