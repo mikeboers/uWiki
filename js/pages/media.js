@@ -46,7 +46,7 @@ function setup_mde_editor() {
     var $textarea = $('#content');
     var editor = new SimpleMDE({element: $textarea[0]});
 
-    $textarea.closes('form').submit(function() {
+    $textarea.closest('form').submit(function() {
         $textarea.val(editor.value());
     });
 

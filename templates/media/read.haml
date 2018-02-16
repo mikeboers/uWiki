@@ -1,0 +1,25 @@
+%%inherit(file="/_main.haml")
+%%namespace(name='utils', file='/_utils.haml')
+%%namespace(name='media_utils', file='./_utils.haml')
+
+- type_str = (media.type if media else None) or 'media'
+
+@breadcrumb
+    %li
+        &= media.title if media else name
+        ##- if media and not media.is_public:
+        ##    %span.glyphicon.glyphicon-eye-close
+
++media_utils.nav(name, media)
+
+- if version:
+    
+    - if version is not media.latest:
+        %.alert.alert-warning
+            %strong This ${type_str} is out of date.
+            %a(href=url_for('page', name=media.slug)) See the most recent version.
+
+    #media-content= markdown(version.content)
+
+- else:
+    %em This ${type_str} has no content.

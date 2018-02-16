@@ -19,4 +19,4 @@ requires_root = lambda func: authz.route_acl('''
 
 from . import index
 from . import login
-from . import page
+from . import media

@@ -1,20 +1,20 @@
 %%inherit(file="/_main.haml")
 %%namespace(name='utils', file='/_utils.haml')
-%%namespace(name='page_utils', file='./_utils.haml')
+%%namespace(name='media_utils', file='./_utils.haml')
 
 @breadcrumb
     %li
-        &= page.title if page else name
-        ##- if not page.is_public:
+        &= media.title if media else name
+        ##- if not media.is_public:
         ##    %span.glyphicon.glyphicon-eye-close
 
-+page_utils.nav(name)
++media_utils.nav(name)
 
 %h1 History of "${name}"
 
 
-- if page and page.versions:
-    - versions = list(reversed(page.versions))
+- if media and media.versions:
+    - versions = list(reversed(media.versions))
     %ul - for i, version in enumerate(versions):
         %li
             %a(href=url_for('page', name=name, version_id=version.id))
@@ -30,4 +30,4 @@
                     Changes.
 
 - else:
-    %em This page has no content.
+    %em This media has no content.

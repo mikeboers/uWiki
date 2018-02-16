@@ -7,7 +7,7 @@ app.endpoint_handler = function(endpoint, func) {
     app._endpoint_handlers[endpoint].push(func)
 }
 
-//= require pages/wiki
+//= require pages/media
 
 jQuery(function($) {
     app.endpoint = $('body').data('endpoint');

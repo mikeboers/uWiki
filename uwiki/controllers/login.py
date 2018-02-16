@@ -1,7 +1,7 @@
 import time
 
 import wtforms as wtf
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from flask_login import login_user, login_required, logout_user
 
 from ..core import authn
@@ -14,7 +14,7 @@ def load_user(userid):
     return User.query.filter_by(name=userid).first()
 
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
 
     username = wtf.TextField('Username', validators=[wtf.validators.Required()])
     password = wtf.PasswordField('Password', validators=[wtf.validators.Required()])
@@ -133,4 +133,4 @@ def login_switch_user():
 def logout():
     logout_user()
     flash('Logged out.')
-    return redirect(request.args.get("next") or url_for("index"))
+    return redirect(request.args.get("next") or url_for("page", name='Index'))
