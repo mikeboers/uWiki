@@ -1,3 +1,5 @@
+import difflib
+
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm as Form
 import wtforms as wtf
@@ -144,6 +146,22 @@ def page(name='Index'):
             abort(404)
     else:
         version = page and page.latest_version
+
+    if 'diff_from_id' in request.args:
+        
+        diff_from = next((version for version in page.versions if version.id == int(request.args['diff_from_id'])), None)
+        if not diff_from:
+            abort(404)
+
+        diff = list(difflib.Differ().compare(diff_from.content.splitlines(), version.content.splitlines()))
+        diff = [(line[0], line[2:]) for line in diff]
+        return render_template('page/diff.haml',
+            page=page,
+            name=name,
+            v1=diff_from,
+            v2=version,
+            diff=diff,
+        )
     
     return render_template('page/read.haml',
         page=page,

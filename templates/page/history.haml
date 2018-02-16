@@ -14,15 +14,20 @@
 
 
 - if page and page.versions:
-    %ul - for vi, version in reversed(list(enumerate(page.versions))):
-        %li %a(href=url_for('page', name=name, version_id=version.id))
-            v${vi + 1}
-            at ${version.created_at.strftime('%Y-%m-%d %H:%M:%S')}
-            by
-            %em
-                ${version.creator.display_name|h}
-                %small (${version.creator.name|h})
-            ${len(version.content)} bytes.
+    - versions = list(reversed(page.versions))
+    %ul - for i, version in enumerate(versions):
+        %li
+            %a(href=url_for('page', name=name, version_id=version.id))
+                %strong
+                    ${version.created_at.strftime('%b %d, %Y at %H:%M %p')}
+                by
+                %em
+                    ${version.creator.display_name|h}
+                    %small (${version.creator.name|h})
+            - if i < len(versions) - 1:
+                ::
+                %a(href=url_for('page', name=name, action='diff', version_id=version.id, diff_from_id=versions[i + 1].id))
+                    Changes.
 
 - else:
     %em This page has no content.

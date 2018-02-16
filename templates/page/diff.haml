@@ -1,0 +1,49 @@
+%%inherit(file="/_main.haml")
+%%namespace(name='utils', file='/_utils.haml')
+%%namespace(name='page_utils', file='./_utils.haml')
+-!
+    SRC = '-'
+    DST = '+'
+    COMMON = ' '
+    HINT = '?'
+    op_to_class = {
+        SRC: 'diff-src',
+        DST: 'diff-dst',
+        COMMON: 'diff-common',
+        HINT: 'diff-hint',
+    }
+
+@breadcrumb
+    %li
+        &= page.title if page else name
+        ##- if page and not page.is_public:
+        ##    %span.glyphicon.glyphicon-eye-close
+
++page_utils.nav(name, page)
+
+%h1 Changes to "${name}"
+%h4 
+    Made on
+    %strong ${v2.created_at.strftime('%b %d, %Y at %H:%M %p')}
+    by
+    %em
+        ${v2.creator.display_name|h}
+        %small (${v2.creator.name|h})
+
+%hr
+
+-
+    src_line_num = 0
+    dst_line_num = 0
+%table.diff - for op, line in diff:
+    %tr.diff-line(class_=op_to_class[op])
+        %td.src-line-num
+            - if op in (SRC, COMMON):
+                = src_line_num
+                - src_line_num += 1
+        %td.dst-line-num
+            - if op in (DST, COMMON):
+                = dst_line_num
+                - dst_line_num += 1
+        %td.diff-op &= op
+        %td.diff-content &= line.rstrip('\n')
