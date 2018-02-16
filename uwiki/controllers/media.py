@@ -38,16 +38,15 @@ def page(name='Index'):
         else:
             abort(404)
 
-    # If it doesn't exist, don't let non-users see the media.
+    # If it doesn't exist, don't let non-users create it.
     if not media and not authz.can('media.create', ACL('ALLOW AUTHENTICATED ALL')):
         abort(404)
 
-    # Assert we are on the normalized media.
+    # Assert we are on the normalized URL.
     if media and media.slug != slug:
         return redirect(url_for('media', name=media.slug))
 
     if request.args.get('action') == 'history':
-        # TODO: Add a media.history.read perm.
         return render_template('media/history.haml', name=slug, media=media)
 
     if request.args.get('action') == 'edit':

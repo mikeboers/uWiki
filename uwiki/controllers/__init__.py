@@ -15,8 +15,12 @@ requires_root = lambda func: authz.route_acl('''
 ''')(func)
 
 
+@app.route('/')
+def redirect_to_index():
+    return redirect(url_for('page', name='Index'))
+
+
 # --- Register the pages.
 
-from . import index
-from . import login
+from . import auth
 from . import media
