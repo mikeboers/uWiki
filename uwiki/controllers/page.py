@@ -1,5 +1,5 @@
 from flask_login import current_user, login_required
-from flask_wtf import Form
+from flask_wtf import FlaskForm as Form
 import wtforms as wtf
 
 from uwiki.utils import sluggify_name
@@ -92,13 +92,13 @@ def page(name='Index'):
         is_owner = not page or page.owner == current_user # current_user is a proxy, so "is" would fail
 
         if is_admin:
-            form = AdminPageForm(request.form, page)
+            form = AdminPageForm(request.form, obj=page)
             # Manually coerce to 0 for the select field.
             form.owner_id.data = form.owner_id.data or 0
         elif is_owner:
-            form = OwnerPageForm(request.form, page)
+            form = OwnerPageForm(request.form, obj=page)
         else:
-            form = PageForm(request.form, page)
+            form = PageForm(request.form, obj=page)
 
 
         # Setup the owner/group fields.
