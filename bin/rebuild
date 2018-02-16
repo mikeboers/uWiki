@@ -8,6 +8,6 @@ echo Creating user: $(whoami)
 uwiki-user -p password --role wheel $(whoami)  || exit $?
 
 echo Creating initial pages
-uwiki-page edit Index < etc/pages/Index || exit $?
-uwiki-page edit Markdown < etc/pages/Markdown || exit $?
-uwiki-page --private edit Private < etc/pages/Private || exit $?
+uwiki-media -t page edit Index < etc/pages/Index || exit $?
+uwiki-media -t page edit Markdown < etc/pages/Markdown || exit $?
+uwiki-media -t page --private edit Private < etc/pages/Private || exit $?

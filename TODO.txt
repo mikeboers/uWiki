@@ -1,5 +1,6 @@
 
 - Titles should be able to have whatever does not need to be escaped
+
 - PageURL which is what is first consulted to resolve pages
     page_id
     slug
@@ -12,9 +13,20 @@
 
     We should consider a rst-like syntax: .. index
 
-- uploading assets to /media
 
+- uploading assets to /media
   - image resizing
 
-- preserve permissions in page versions
-    - either in a metadata field, or in actual fields
+- abstract pages and images to "media"
+    - "media_object" and "media_version" tables
+    - they are roughly the same, except in how they repreent their "content"
+
+- preserve permissions in media versions
+
+- a DSL for permissions?
+    - is there a clear permission heirarchy?
+        No! `write` -> `read`, but neither implies `pass` or `list`.
+
+    - eg1
+        authed write; all read,list,pass
+

@@ -14,6 +14,7 @@ def upgrade(engine):
 
         sa.Column('password_hash', sa.String),
         sa.Column('roles', sa.String),
+        sa.Column('groups', sa.String),
 
         sa.Column('display_name', sa.String, nullable=False, server_default=''),
         sa.Column('email', sa.String, nullable=False, server_default=''),

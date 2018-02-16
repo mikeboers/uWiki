@@ -6,7 +6,7 @@ from flask_login import current_user
 from flask_mako import render_template
 
 from ..core import app, db, authn, authz
-from ..models import User, Page, PageContent
+from ..models import User, Media, MediaVersion
 
 
 requires_root = lambda func: authz.route_acl('''

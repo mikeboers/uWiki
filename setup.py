@@ -15,7 +15,7 @@ setup(
     entry_points={
         'console_scripts': [
             'uwiki-migrate = uwiki.commands.migrate:main',
-            'uwiki-page = uwiki.commands.page:main',
+            'uwiki-media = uwiki.commands.media:main',
             'uwiki-user = uwiki.commands.user:main',
         ],
     },

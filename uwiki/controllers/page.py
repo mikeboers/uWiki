@@ -10,76 +10,41 @@ from uwiki.auth import ACL
 from . import *
 
 
-class PageForm(Form):
+class MediaForm(Form):
     title = wtf.TextField(validators=[wtf.validators.Required()])
     content = wtf.TextAreaField(validators=[wtf.validators.Required()])
-
-
-def _common_fields():
-    group = wtf.SelectField()
-    group_perms = wtf.SelectField('Group Permissions', choices=[
-        ('write', 'Read/Write'),
-        ('read', 'Read'),
-        ('list', 'None'),
-        ('none', 'None & Hidden'),
-    ], default='write')
-    other_perms = wtf.SelectField('Other User Permissions', choices=[
-        ('write', 'Read/Write'),
-        ('read', 'Read'),
-        ('list', 'None'),
-        ('none', 'None & Hidden'),
-    ], default='write')
-    anon_perms = wtf.SelectField('Anonymous Permissions', choices=[
-        ('read', 'Read'),
-        ('list', 'None'),
-        ('none', 'None & Hidden'),
-    ], default='read')
-    return group, group_perms, other_perms, anon_perms
-
-class OwnerPageForm(PageForm):
-    group, group_perms, other_perms, anon_perms = _common_fields()
-
-class AdminPageForm(PageForm):
-
-    # I don't like setting the ID field, but it should be okay to do this.
-    # As long as you don't user the "owner" field directly until it is
-    # comitted, this is okay.
-    owner_id = wtf.SelectField('Owner', coerce=int, description='Page owners can modify non-custom permissions')
-
-    group, group_perms, other_perms, anon_perms = _common_fields()
-
-    custom_acl = wtf.TextAreaField('Custom ACL', description='For admin use only.')
+    # acl = wtf.TextField('Access Control List')
 
 
 @app.route('/wiki/')
 @login_required
 def page_index():
-    pages = Page.query.all()
-    pages.sort(key=lambda p:p.title)
-    return render_template('page/index.haml', pages=pages)
+    pages = Media.query.all()
+    pages.sort(key=lambda page: page.title)
+    pages = [p for p in pages if authz.can('media.list', p)]
+    return render_template('/page/index.haml', pages=pages)
 
 
 @app.route('/wiki/<path:name>', methods=['GET', 'POST'])
 def page(name='Index'):
 
     slug = sluggify_name(name)
-    page = Page.query.filter(Page.name.like(slug)).first()
+    page = Media.query.filter(Media.slug.like(slug)).first()
 
     # Make sure private pages stay that way.
-    if page and not authz.can('page.read', page):
-        if authz.can('page.list', page):
+    if page and not authz.can('media.read', page):
+        if authz.can('media.list', page):
             abort(403)
         else:
             abort(404)
 
     # If it doesn't exist, don't let non-users see the page.
-    if not page and not authz.can('page.create', ACL('ALLOW AUTHENTICATED ALL')):
-        print 'HERE'
+    if not page and not authz.can('media.create', ACL('ALLOW AUTHENTICATED ALL')):
         abort(404)
 
     # Assert we are on the normalized page.
-    if page and page.name != slug:
-        return redirect(url_for('page', name=page.name))
+    if page and page.slug != slug:
+        return redirect(url_for('page', name=page.slug))
 
     if request.args.get('action') == 'history':
         # TODO: Add a page.history.read perm.
@@ -87,55 +52,30 @@ def page(name='Index'):
 
     if request.args.get('action') == 'edit':
 
-        if page and not authz.can('page.write', page):
+        if page and not authz.can('media.write', page):
             return app.login_manager.unauthorized()
 
-        is_admin = authz.can('page.admin', page) if page else authz.can('page.admin', ACL('ALLOW WHEEL ALL'))
-        is_owner = not page or page.owner == current_user # current_user is a proxy, so "is" would fail
+        form = MediaForm(request.form, obj=page)
+        # if page and not authz.can('media.auth', page):
+            # print list(page.__acl__)
+            #del form.acl
 
-        if is_admin:
-            form = AdminPageForm(request.form, obj=page)
-            # Manually coerce to 0 for the select field.
-            form.owner_id.data = form.owner_id.data or 0
-        elif is_owner:
-            form = OwnerPageForm(request.form, obj=page)
-        else:
-            form = PageForm(request.form, obj=page)
-
-
-        # Setup the owner/group fields.
-        if is_admin or is_owner:
-            users = User.query.all()
-            if is_admin:
-                form['owner_id'].choices = [
-                    (u.id, '%s (%s)' % (u.display_name, u.name))
-                    for u in User.query.all()
-                ]
-                form['owner_id'].choices.append((0, '<nobody>'))
-            groups = set()
-            for u in users:
-                groups.update(u.groups)
-            form['group'].choices = [(g, g) for g in sorted(groups)]
-            form['group'].choices.append(('', '<none>'))
-
-        form.title.data = form.title.data or name
+        if page is None:
+            form.title.data = name
+            form.content.data = '# ' + name
 
         if form.validate_on_submit():
 
             if not page:
-                page = Page()
+                page = Media(type='page')
                 page.owner = current_user
                 db.session.add(page)
 
-            # Manually coerce back to none.
-            if is_admin:
-                form.owner_id.data = form.owner_id.data or None
-
             form.populate_obj(page)
-            # The page.owner is broken until the commit.
+            
             db.session.commit()
 
-            return redirect(url_for('page', name=page.name))
+            return redirect(url_for('page', name=page.slug))
 
         return render_template('page/edit.haml', name=slug, page=page, form=form)
 
@@ -145,7 +85,7 @@ def page(name='Index'):
         if not version:
             abort(404)
     else:
-        version = page and page.latest_version
+        version = page and page.latest
 
     if 'diff_from_id' in request.args:
         

@@ -12,10 +12,10 @@
 
 - if version:
     
-    - if version is not page.latest_version:
+    - if version is not page.latest:
         %.alert.alert-warning
             %strong This page is out of date.
-            %a(href=url_for('page', name=page.name)) See the most recent version.
+            %a(href=url_for('page', name=page.slug)) See the most recent version.
 
     #page-content= markdown(version.content)
 

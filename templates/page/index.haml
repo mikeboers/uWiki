@@ -11,4 +11,4 @@
 %ul
     - for page in pages:
         %li
-            %a(href=url_for('page', name=page.name))= page.title
+            %a(href=url_for('page', name=page.slug))= page.title

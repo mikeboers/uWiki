@@ -38,8 +38,9 @@ def parse_users_and_groups(pred):
     if pred.startswith(':'):
         group = pred[1:]
         return lambda user, **ctx: group in user.groups
-    if pred.islower():
-        return lambda user, **ctx: user.name == pred
+    if pred.startswith('@'):
+        name = pred[1:]
+        return lambda user, **ctx: user.name == name
 
 # Posix nomenclature.
 authz.predicates['OTHER'] = lambda **kw: True
