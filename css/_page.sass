@@ -9,22 +9,26 @@ body.view-page ul.nav a
 .diff
 
     font-family: monospace
-    whitespace: pre
 
     width: 100%
 
-    .src-line-num, .dst-line-num
+    td
+        padding: 0 1ex
+
+    .src-line-num, .dst-line-num, .diff-op
         color: #ccc
         text-align: right
-        padding: 0 1ex
         border-right: solid 1px #ccc
         width: 6ch;
 
     .diff-op
-        padding-left: 1ex
         width: 1ch
+        color: #aaa
 
     .diff-src
         background-color: rgb(255, 236, 236)
     .diff-dst
         background-color: rgb(236, 255, 236)
+
+    .diff-content
+        white-space: pre
