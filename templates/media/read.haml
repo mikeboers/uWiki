@@ -23,7 +23,7 @@
     - if version is not media.latest:
         %.alert.alert-warning
             %strong This ${type_str} is out of date.
-            %a(href=url_for('page', name=media.slug)) See the most recent version.
+            %a(href=url_for('media', type_=media.type, name=media.slug)) See the most recent version.
 
     #media-content= markdown(version.content)
 

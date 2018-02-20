@@ -17,7 +17,7 @@
     - versions = list(reversed(media.versions))
     %ul - for i, version in enumerate(versions):
         %li
-            %a(href=url_for('page', name=name, version_id=version.id))
+            %a(href=url_for('media', type_=media.type, name=name, v=version.id))
                 %strong
                     ${version.created_at.strftime('%b %d, %Y at %H:%M %p')}
                 by
@@ -26,7 +26,7 @@
                     %small (${version.creator.name|h})
             - if i < len(versions) - 1:
                 ::
-                %a(href=url_for('page', name=name, action='diff', version_id=version.id, diff_from_id=versions[i + 1].id))
+                %a(href=url_for('media', type_=media.type, name=name, action='diff', v1=versions[i + 1].id, v2=version.id))
                     Changes.
 
 - else:

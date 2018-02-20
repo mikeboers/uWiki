@@ -3,12 +3,14 @@
 %%namespace(name='page_utils', file='./_utils.haml')
 
 @breadcrumb
-    %li Page Index
+    %li Index
 
 %h1
-    Page Index
+    Index
 
 %ul
-    - for page in pages:
+    - for media in media_objects:
         %li
-            %a(href=url_for('page', name=page.slug))= page.title
+            %a(href=url_for('media', type_=media.type, name=media.slug)) &= media.title
+            - if media.latest.acl:
+                %br %small %code &= media.latest.acl

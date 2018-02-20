@@ -1,15 +1,16 @@
 import datetime
-import re
 import logging
+import re
 
-import sqlalchemy as sa
-import werkzeug as wz
+import flask
 from flask_login import current_user
 import flask_acl.state
+import sqlalchemy as sa
+import werkzeug as wz
 
-from ..core import app, db
-from ..utils import sluggify_name
-from ..auth import Group as GroupPredicate
+from ...auth import Group as GroupPredicate
+from ...core import app, db
+from ...utils import sluggify_name
 
 
 log = logging.getLogger(__name__)
@@ -23,6 +24,12 @@ class Media(db.Model):
         extend_existing=True,
     )
 
+    __mapper_args__ = dict(
+        polymorphic_on='type',
+    )
+
+    _url_key = None
+
     _title = db.Column('title', db.String)
     owner = sa.orm.relationship('User')
 
@@ -32,6 +39,9 @@ class Media(db.Model):
             self.slug
         )
 
+    def url_for(self, view, **kwargs):
+        return flask.url_for(view, type_=self.type, name=self.slug, **kwargs)
+
     @property
     def title(self):
         return self._title
@@ -40,6 +50,12 @@ class Media(db.Model):
     def title(self, value):
         self._title = value
         self.slug = sluggify_name(value)
+    
+    def get_version(self, version):
+        return MediaVersion.query.filter(sa.and_(
+            MediaVersion.object_id == self.id,
+            MediaVersion.id == version
+        )).first()
     
     _latest = None
 

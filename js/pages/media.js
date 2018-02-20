@@ -53,7 +53,7 @@ function setup_mde_editor() {
 }
 
 
-app.endpoint_handler('page', function() {
+app.endpoint_handler('media', function() {
     
     setup_mde_editor();
 

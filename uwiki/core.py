@@ -72,4 +72,6 @@ authz = ACLManager(app)
 from . import auth as _auth
 from . import models
 
+app.url_map.converters['media_type'] = models.media.MediaTypeConverter
+
 # Controllers are NOT registered here!

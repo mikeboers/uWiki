@@ -2,13 +2,13 @@ import difflib
 
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm as Form
-import wtforms as wtf
 import flask_acl.core
+import wtforms as wtf
 
-from ..utils import sluggify_name
+from . import *
 from ..auth import ACL
 from ..models.media import parse_short_acl
-from . import *
+from ..utils import sluggify_name
 
 
 def validate_acl(form, self):
@@ -25,14 +25,14 @@ class MediaForm(Form):
     acl = wtf.TextField('Access Control List', validators=[validate_acl])
 
 
-@app.route('/wiki/')
-def page_index():
+@app.route('/<media_type:type_>/')
+def media_index(type_):
     
-    all_pages = Media.query.all()
+    all_pages = Media.query.filter(Media.type == type_).all()
     all_pages.sort(key=lambda media: media.title)
 
     by_slug = {}
-    pages = []
+    objects = []
     for page in all_pages:
         
         by_slug[page.slug] = page
@@ -49,16 +49,19 @@ def page_index():
                 break
 
         if can_traverse:
-            pages.append(page)
+            objects.append(page)
 
-    return render_template('/media/index.haml', pages=pages)
+    return render_template('/media/index.haml', media_objects=objects)
 
 
-@app.route('/wiki/<path:name>', methods=['GET', 'POST'])
-def page(name='Index'):
+@app.route('/<media_type:type_>/<path:name>', methods=['GET', 'POST'])
+def media(type_='page', name='Index'):
 
     slug = sluggify_name(name)
-    media = Media.query.filter(Media.slug.like(slug)).first()
+    media = Media.query.filter(sa.and_(
+        Media.type == type_,
+        Media.slug.like(slug),
+    )).first()
 
     # Make sure private pages stay that way.
     if media and not authz.can('read', media):
@@ -121,35 +124,27 @@ def page(name='Index'):
 
         return render_template('media/edit.haml', name=slug, media=media, form=form)
 
-    if 'version_id' in request.args:
-        # TODO: Add a media.history.read perm.
-        version = MediaVersion.query.filter(sa.and_(
-            MediaVersion.object_id == media.id,
-            MediaVersion.id == int(request.args['version_id'])
-        )).first()
-        if not version:
-            abort(404)
-    else:
-        version = media and media.latest
-
-    if 'diff_from_id' in request.args:
-        
-        diff_from = MediaVersion.query.filter(sa.and_(
-            MediaVersion.object_id == media.id,
-            MediaVersion.id == int(request.args['diff_from_id'])
-        )).first()
-        if not diff_from:
-            abort(404)
-
-        diff = list(difflib.Differ().compare(diff_from.content.splitlines(), version.content.splitlines()))
+    if request.args.get('action') == 'diff':
+        v1 = media.get_version(int(request.args['v1']))
+        v2 = media.get_version(int(request.args['v2']))
+        diff = list(difflib.Differ().compare(v1.content.splitlines(), v2.content.splitlines()))
         diff = [(line[0], line[2:]) for line in diff]
         return render_template('media/diff.haml',
             media=media,
             name=name,
-            v1=diff_from,
-            v2=version,
+            v1=v1,
+            v2=v2,
             diff=diff,
         )
+
+    if 'v' in request.args:
+        # TODO: Add a media.history.read perm.
+        version = media.get_version(int(request.args['v']))
+        if not version:
+            abort(404)
+    elif media:
+        version = media.latest
+
     
     return render_template('media/read.haml',
         media=media,
