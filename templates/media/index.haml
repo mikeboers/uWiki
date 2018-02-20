@@ -12,5 +12,5 @@
     - for media in media_objects:
         %li
             %a(href=url_for('media', type_=media.type, name=media.slug)) &= media.title
-            - if media.latest.acl:
+            - if media.latest.acl and authz.can('auth', media):
                 %br %small %code &= media.latest.acl

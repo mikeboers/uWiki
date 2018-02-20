@@ -35,11 +35,11 @@ authz.predicates['WHEEL'] = Role('wheel')
 
 @authz.predicate_parser
 def parse_users_and_groups(pred):
-    if pred.startswith(':'):
-        group = pred[1:]
+    if pred.startswith('group:'):
+        group = pred.split(':')[1]
         return lambda user, **ctx: group in user.groups
-    if pred.startswith('@'):
-        name = pred[1:]
+    if pred.startswith('user:'):
+        user = pred.split(':')[1]
         return lambda user, **ctx: user.name == name
 
 # Posix nomenclature.

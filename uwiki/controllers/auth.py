@@ -133,4 +133,4 @@ def login_switch_user():
 def logout():
     logout_user()
     flash('Logged out.')
-    return redirect(request.args.get("next") or url_for("page", name='Index'))
+    return redirect(request.args.get("next") or url_for("index"))

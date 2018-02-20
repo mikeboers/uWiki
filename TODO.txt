@@ -30,8 +30,13 @@
     - The common case would only have us looking at the current ACL, so we
       don't really need to optimize for historical stuff.
 
+- Finalize decision on predicates for user and group.
+  - `user:name` and `group:name`
+      this is the most explicit
+  - `~user` and `:group`
+  - `@user` and `:group`
 
-- Should Flack-ACL only parse permissions if the whole thing was given as a string?
+- AUTHN as a synonym for AUTHENTICATED?
 
 - Should page URLs be /wiki/ or /page/ ??
 

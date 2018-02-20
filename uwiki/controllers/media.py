@@ -21,15 +21,15 @@ def validate_acl(form, self):
 
 class MediaForm(Form):
     title = wtf.TextField(validators=[wtf.validators.Required()])
-    content = wtf.TextAreaField(validators=[wtf.validators.Required()])
     acl = wtf.TextField('Access Control List', validators=[validate_acl])
+    content = wtf.TextAreaField(validators=[wtf.validators.Required()])
 
 
 @app.route('/<media_type:type_>/')
 def media_index(type_):
     
     all_pages = Media.query.filter(Media.type == type_).all()
-    all_pages.sort(key=lambda media: media.title)
+    all_pages.sort(key=lambda media: media.title.lower())
 
     by_slug = {}
     objects = []
@@ -61,7 +61,7 @@ def media(type_='page', name='Index', ext=None):
     slug = sluggify_name(name)
     media = Media.query.filter(sa.and_(
         Media.type == type_,
-        Media.slug.like(slug),
+        Media.slug.like(slug), # We use `like` to get case insensitivity.
     )).first()
 
     # Make sure private pages stay that way.
@@ -85,7 +85,7 @@ def media(type_='page', name='Index', ext=None):
 
     # Assert we are on the normalized URL.
     if media and media.slug != slug:
-        return redirect(url_for('media', name=media.slug))
+        return redirect(url_for('media', type_=media.type, name=media.slug))
 
     action = request.args.get('action')
 
@@ -128,8 +128,9 @@ def media(type_='page', name='Index', ext=None):
 
         # Reasonable defaults for first edit.
         if media is None:
-            form.title.data = name
-            form.content.data = '# ' + name
+            title = name.replace('/', ' / ')
+            form.title.data = title
+            form.content.data = '# ' + title
 
         # Manually copy the ACL.
 

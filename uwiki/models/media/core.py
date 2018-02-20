@@ -92,9 +92,15 @@ class Media(db.Model):
         flask.abort(404)
 
 
+short_perms = set(('write', 'read', 'list', 'traverse', 'ANY', 'ALL'))
+short_perm_sets = {
+    '$write': ('write', 'read', 'list', 'traverse'),
+    '$read': ('read', 'list', 'traverse'),
+}
+
 def parse_short_acl(acl, strict=True):
     for ace, (state, pred, perm) in _parse_short_acl(acl, strict):
-        if perm not in ('write', 'read', 'list', 'traverse', 'ANY', 'ALL'):
+        if perm not in short_perms:
             msg = 'ACE parse error on %r; unknown permission' % ace
             if strict:
                 raise ValueError(msg)
@@ -127,7 +133,8 @@ def _parse_short_acl(acl, strict):
             if perm.startswith('-'):
                 state = not state
                 perm = perm[1:]
-            yield ace, (state, pred, perm)
+            for x in short_perm_sets.get(perm, (perm, )):
+                yield ace, (state, pred, x)
 
 
 class MediaVersion(db.Model):
