@@ -24,30 +24,33 @@ def main():
 
 def _main():
 
-    arg_parser = ArgumentParser()
-    arg_parser.add_argument('--private', action='store_true')
-    arg_parser.add_argument('-t', '--type', choices=('page', 'image'))
-    arg_parser.add_argument('mode', choices=['get', 'edit', 'list', 'delete'])
-    arg_parser.add_argument('title', nargs='*')
-    args = arg_parser.parse_args()
+    parser = ArgumentParser()
 
-    mode = args.mode
-    title = ' '.join(args.title) or None
+    commands = parser.add_subparsers(dest='_command')
+
+    set_parser = commands.add_parser('set')
+    set_parser.add_argument('--private', action='store_true')
+    set_parser.add_argument('-t', '--type', choices=('page', 'image'))
+    set_parser.add_argument('title')
+    set_parser.add_argument('content', nargs='*')
+
+    list_parser = commands.add_parser('list')
+    get_parser = commands.add_parser('get')
+    delete_parser = commands.add_parser('delete')
+
+    args = parser.parse_args()
 
 
-    if mode == 'list':
+
+    if args._command == 'list':
         for obj in Media.query.all():
             print '[%s] %s: "%s"' % (obj.type, obj.slug, obj.title)
         return
 
-    if not title:
-        print >> sys.stderr, 'title is required'
-        exit(1)
-
-    slug = urlify_name(title)
+    slug = urlify_name(args.title)
     media = Media.query.filter(sa.and_(Media.type == args.type, Media.slug.like(slug))).first()
 
-    if mode == 'delete':
+    if args._command == 'delete':
 
         if media:
             db.session.delete(media)
@@ -57,7 +60,7 @@ def _main():
             print >> sys.stderr, 'media does not exist'
             exit(1)
 
-    if mode == 'get':
+    if args._command == 'get':
         if media:
             print media.content
             exit(0)
@@ -65,8 +68,12 @@ def _main():
             print >> sys.stderr, 'media does not exist'
             exit(1)
 
-    media = media or Media(type=args.type, title=title)
-    media.add_version(content=sys.stdin.read())
+    if not media:
+        media = Media(type=args.type, title=args.title, owner=current_user)
+
+    
+    media.add_version(content=' '.join(args.content) or sys.stdin.read())
+    
     # if args.private:
         # media.acl = '@{} ALL'.format(current_user.name)
 

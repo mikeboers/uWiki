@@ -21,12 +21,14 @@
     - "media_object" and "media_version" tables
     - they are roughly the same, except in how they repreent their "content"
 
-- preserve permissions in media versions
+- Restore permissions:
 
-- a DSL for permissions?
-    - is there a clear permission heirarchy?
-        No! `write` -> `read`, but neither implies `pass` or `list`.
+    - The logical place for ACLs is on media_versions, so that they are
+      versioned.
+    - They should also be checked against the current master ACL in case
+      they are more restrictive.
+    - The common case would only have us looking at the current ACL, so we
+      don't really need to optimize for historical stuff.
 
-    - eg1
-        authed write; all read,list,pass
 
+- Should Flack-ACL only parse permissions if the whole thing was given as a string?

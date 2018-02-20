@@ -5,6 +5,7 @@ import logging
 import sqlalchemy as sa
 import werkzeug as wz
 from flask_login import current_user
+import flask_acl.state
 
 from ..core import app, db
 from ..utils import sluggify_name
@@ -23,7 +24,7 @@ class Media(db.Model):
     )
 
     _title = db.Column('title', db.String)
-    latest = db.relationship('MediaVersion', foreign_keys='Media.latest_id', post_update=True)
+    owner = sa.orm.relationship('User')
 
     def __repr__(self):
         return '<%s %s>' % (
@@ -40,6 +41,14 @@ class Media(db.Model):
         self._title = value
         self.slug = sluggify_name(value)
     
+    _latest = None
+
+    @property
+    def latest(self):
+        if self._latest is None:
+            self._latest = MediaVersion.query.filter(MediaVersion.object_id == self.id).order_by(MediaVersion.id.desc()).first() or False
+        return self._latest
+
     @property
     def content(self):
         return self.latest.content if self.latest else None
@@ -49,17 +58,57 @@ class Media(db.Model):
         if not self.latest or self.latest.content.strip() != value.strip():
             self.add_version(content=value)
 
-    def add_version(self, content):
-        version = MediaVersion(object=self, content=content)
+    def add_version(self, content, acl=None):
+        if acl is None and self.latest:
+            acl = self.latest.acl
+        version = MediaVersion(object=self, content=content, acl=acl)
         self.versions.append(version)
-        self.latest = version
+        self._latest = version
 
     @property
     def __acl__(self):
-        yield ('ALLOW', 'WHEEL', 'ALL')
+        yield 'ALLOW WHEEL ALL'
         if self.latest:
             for ace in self.latest.__acl__:
                 yield ace
+
+
+def parse_short_acl(acl, strict=True):
+    for ace, (state, pred, perm) in _parse_short_acl(acl, strict):
+        if perm not in ('write', 'read', 'list', 'traverse', 'ANY', 'ALL'):
+            msg = 'ACE parse error on %r; unknown permission' % ace
+            if strict:
+                raise ValueError(msg)
+            else:
+                log.warning(msg)
+        yield (state, pred, perm)
+
+def _parse_short_acl(acl, strict):
+
+    for ace in acl.split(';'):
+
+        default_state = True
+        parts = ace.strip().split()
+
+        if len(parts) == 3:
+            yield ace, parts
+            continue
+
+        if len(parts) != 2:
+            msg = 'ACE parse error on %r; invalid format' % ace
+            if strict:
+                raise ValueError(msg)
+            else:
+                log.warning(msg)
+            continue
+
+        pred, perms = parts
+        for perm in perms.split(','):
+            state = default_state
+            if perm.startswith('-'):
+                state = not state
+                perm = perm[1:]
+            yield ace, (state, pred, perm)
 
 
 class MediaVersion(db.Model):
@@ -86,30 +135,17 @@ class MediaVersion(db.Model):
         # We like this being a generator because then the WHEEL will get
         # checked long before there could be a parse issue with the custom_acl.
 
-        yield ('ALLOW', 'WHEEL', 'ALL')
-    
+        yield 'ALLOW WHEEL ALL'
+
         if self.acl:
-
-            for ace in self.acl.split(';'):
-
-                parts = ace.strip().split()
-                if len(parts) != 2:
-                    log.warning('ACE parse error on %r' % ace)
-                    continue
-
-                pred, perm = parts
-                for perm in perms.split(','):
-                    allow = True
-                    if perm.startswith('-'):
-                        allow = False
-                        perm = perm[1:]
-                    yield (allow, pred, 'media.' + perm)
+            for x in parse_short_acl(self.acl, strict=False):
+                yield x
 
         else:
-            yield ('ALLOW', 'AUTHENTICATED', 'media.write')
-            yield ('ALLOW', 'ANY',           'media.pass')
-            yield ('ALLOW', 'ANY',           'media.list')
-            yield ('ALLOW', 'ANY',           'media.read')
+            yield ('ALLOW', 'AUTHENTICATED', 'write')
+            yield ('ALLOW', 'ANY',           'list')
+            yield ('ALLOW', 'ANY',           'read')
+            yield ('ALLOW', 'ANY',           'traverse')
 
-        yield ('DENY', 'ANY', 'ALL')
+        yield 'DENY ANY ALL'
 

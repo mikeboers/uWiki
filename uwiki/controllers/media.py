@@ -3,25 +3,54 @@ import difflib
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm as Form
 import wtforms as wtf
+import flask_acl.core
 
-from uwiki.utils import sluggify_name
-
-from uwiki.auth import ACL
+from ..utils import sluggify_name
+from ..auth import ACL
+from ..models.media import parse_short_acl
 from . import *
 
+
+def validate_acl(form, self):
+    acl = self.data
+    if acl:
+        try:
+            list(flask_acl.core.parse_acl(parse_short_acl(acl, strict=True)))
+        except ValueError as e:
+            raise wtf.validators.ValidationError(e.args[0])
 
 class MediaForm(Form):
     title = wtf.TextField(validators=[wtf.validators.Required()])
     content = wtf.TextAreaField(validators=[wtf.validators.Required()])
-    # acl = wtf.TextField('Access Control List')
+    acl = wtf.TextField('Access Control List', validators=[validate_acl])
 
 
 @app.route('/wiki/')
-@login_required
 def page_index():
-    pages = Media.query.all()
-    pages.sort(key=lambda media: media.title)
-    pages = [p for p in pages if authz.can('media.list', p)]
+    
+    all_pages = Media.query.all()
+    all_pages.sort(key=lambda media: media.title)
+
+    by_slug = {}
+    pages = []
+    for page in all_pages:
+        
+        by_slug[page.slug] = page
+        
+        if not authz.can('list', page):
+            continue
+        
+        path = page.slug.split('/')
+        can_traverse = True
+        for i in xrange(1, len(path)):
+            parent = by_slug.get('/'.join(path[:i]))
+            if parent and not authz.can('traverse', parent):
+                can_traverse = False
+                break
+
+        if can_traverse:
+            pages.append(page)
+
     return render_template('/media/index.haml', pages=pages)
 
 
@@ -32,14 +61,22 @@ def page(name='Index'):
     media = Media.query.filter(Media.slug.like(slug)).first()
 
     # Make sure private pages stay that way.
-    if media and not authz.can('media.read', media):
-        if authz.can('media.list', media):
+    if media and not authz.can('read', media):
+        if authz.can('list', media):
             abort(403)
         else:
             abort(404)
 
+    if media and '/' in media.slug:
+        path = slug.split('/')
+        parent_slugs = ['/'.join(path[:i]) for i in xrange(1, len(path))]
+        parents = Media.query.filter(Media.slug.in_(parent_slugs)).all()
+        for parent in parents:
+            if not authz.can('traverse', parent):
+                abort(404)
+
     # If it doesn't exist, don't let non-users create it.
-    if not media and not authz.can('media.create', ACL('ALLOW AUTHENTICATED ALL')):
+    if not media and not authz.can('create', ACL('ALLOW AUTHENTICATED ALL')):
         abort(404)
 
     # Assert we are on the normalized URL.
@@ -51,17 +88,15 @@ def page(name='Index'):
 
     if request.args.get('action') == 'edit':
 
-        if media and not authz.can('media.write', media):
+        if media and not authz.can('write', media):
             return app.login_manager.unauthorized()
 
         form = MediaForm(request.form, obj=media)
-        # if media and not authz.can('media.auth', media):
-            # print list(media.__acl__)
-            #del form.acl
 
-        if media is None:
-            form.title.data = name
-            form.content.data = '# ' + name
+        can_acl = not (media and not authz.can('auth', media))
+
+        if can_acl and form.acl.data is None:
+            form.acl.data = (media.latest.acl if media else '') or ''
 
         if form.validate_on_submit():
 
@@ -70,17 +105,28 @@ def page(name='Index'):
                 media.owner = current_user
                 db.session.add(media)
 
-            form.populate_obj(media)
+            media.title = form.title.data
+            media.add_version(content=form.content.data, acl=form.acl.data if can_acl else None)
 
             db.session.commit()
 
             return redirect(url_for('page', name=media.slug))
 
+        # Reasonable defaults for first edit.
+        if media is None:
+            form.title.data = name
+            form.content.data = '# ' + name
+
+        # Manually copy the ACL.
+
         return render_template('media/edit.haml', name=slug, media=media, form=form)
 
     if 'version_id' in request.args:
         # TODO: Add a media.history.read perm.
-        version = next((version for version in media.versions if version.id == int(request.args['version_id'])), None)
+        version = MediaVersion.query.filter(sa.and_(
+            MediaVersion.object_id == media.id,
+            MediaVersion.id == int(request.args['version_id'])
+        )).first()
         if not version:
             abort(404)
     else:
@@ -88,7 +134,10 @@ def page(name='Index'):
 
     if 'diff_from_id' in request.args:
         
-        diff_from = next((version for version in media.versions if version.id == int(request.args['diff_from_id'])), None)
+        diff_from = MediaVersion.query.filter(sa.and_(
+            MediaVersion.object_id == media.id,
+            MediaVersion.id == int(request.args['diff_from_id'])
+        )).first()
         if not diff_from:
             abort(404)
 

@@ -15,7 +15,8 @@ def upgrade(engine):
         sa.UniqueConstraint('type', 'slug'),
 
         sa.Column('title', sa.String),
-        sa.Column('latest_id', sa.Integer, sa.ForeignKey('media_versions.id')),
+
+        sa.Column('owner_id', sa.Integer, sa.ForeignKey('users.id'), nullable=False)
 
     )
 
