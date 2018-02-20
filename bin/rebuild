@@ -9,5 +9,5 @@ uwiki-user -p password --role wheel $(whoami)  || exit $?
 
 echo Creating initial pages
 uwiki-media set -t page Index < etc/pages/Index || exit $?
-uwiki-media set -t page Markdown < etc/pages/Markdown || exit $?
-uwiki-media set -t page --private Private < etc/pages/Private || exit $?
+uwiki-media set -t page 'Meta / Markdown' < etc/pages/Markdown || exit $?
+uwiki-media set -t page --authenticated 'Sandbox / Private' < etc/pages/Private || exit $?

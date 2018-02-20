@@ -55,7 +55,8 @@ def media_index(type_):
 
 
 @app.route('/<media_type:type_>/<path:name>', methods=['GET', 'POST'])
-def media(type_='page', name='Index'):
+@app.route('/<media_type:type_>/<path:name>.<ext>', methods=['GET', 'POST'])
+def media(type_='page', name='Index', ext=None):
 
     slug = sluggify_name(name)
     media = Media.query.filter(sa.and_(
@@ -86,10 +87,20 @@ def media(type_='page', name='Index'):
     if media and media.slug != slug:
         return redirect(url_for('media', name=media.slug))
 
-    if request.args.get('action') == 'history':
+    action = request.args.get('action')
+
+    # Delegate to the media object.
+    if ext:
+        if action:
+            abort(404)
+        if not media:
+            abort(404)
+        return media.handle_typed_request(ext)
+
+    if action == 'history':
         return render_template('media/history.haml', name=slug, media=media)
 
-    if request.args.get('action') == 'edit':
+    elif action == 'edit':
 
         if media and not authz.can('write', media):
             return app.login_manager.unauthorized()
@@ -113,7 +124,7 @@ def media(type_='page', name='Index'):
 
             db.session.commit()
 
-            return redirect(url_for('page', name=media.slug))
+            return redirect(url_for('media', type_=media.type, name=media.slug))
 
         # Reasonable defaults for first edit.
         if media is None:
@@ -124,7 +135,7 @@ def media(type_='page', name='Index'):
 
         return render_template('media/edit.haml', name=slug, media=media, form=form)
 
-    if request.args.get('action') == 'diff':
+    elif action == 'diff':
         v1 = media.get_version(int(request.args['v1']))
         v2 = media.get_version(int(request.args['v2']))
         diff = list(difflib.Differ().compare(v1.content.splitlines(), v2.content.splitlines()))
@@ -137,18 +148,24 @@ def media(type_='page', name='Index'):
             diff=diff,
         )
 
-    if 'v' in request.args:
-        # TODO: Add a media.history.read perm.
-        version = media.get_version(int(request.args['v']))
-        if not version:
-            abort(404)
-    elif media:
-        version = media.latest
+    elif action:
+        abort(404)
 
-    
-    return render_template('media/read.haml',
-        media=media,
-        version=version,
-        name=name,
-    )
+    else:
+
+        if 'v' in request.args:
+            # TODO: Add a media.history.read perm.
+            version = media.get_version(int(request.args['v']))
+            if not version:
+                abort(404)
+        else:
+            version = media.latest if media else None
+
+        
+        return render_template('media/read.haml',
+            media=media,
+            media_type=type_,
+            version=version,
+            name=name,
+        )
 

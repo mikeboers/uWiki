@@ -29,7 +29,7 @@ def _main():
     commands = parser.add_subparsers(dest='_command')
 
     set_parser = commands.add_parser('set')
-    set_parser.add_argument('--private', action='store_true')
+    set_parser.add_argument('--authenticated', action='store_true')
     set_parser.add_argument('-t', '--type', choices=('page', 'image'))
     set_parser.add_argument('title')
     set_parser.add_argument('content', nargs='*')
@@ -74,8 +74,8 @@ def _main():
     
     media.add_version(content=' '.join(args.content) or sys.stdin.read())
     
-    # if args.private:
-        # media.acl = '@{} ALL'.format(current_user.name)
+    if args.authenticated:
+        media.acl = 'AUTHENTICATED read,write,list'
 
     db.session.add(media)
     db.session.commit()

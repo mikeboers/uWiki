@@ -32,3 +32,10 @@
 
 
 - Should Flack-ACL only parse permissions if the whole thing was given as a string?
+
+- Should page URLs be /wiki/ or /page/ ??
+
+  wiki.mm/page/Index
+  wiki.mm/wiki/Index
+
+  If we go with /page/, then we can do away with the complex mapping back and forth.

@@ -88,6 +88,9 @@ class Media(db.Model):
             for ace in self.latest.__acl__:
                 yield ace
 
+    def handle_typed_request(self, ext):
+        flask.abort(404)
+
 
 def parse_short_acl(acl, strict=True):
     for ace, (state, pred, perm) in _parse_short_acl(acl, strict):
