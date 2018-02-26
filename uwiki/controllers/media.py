@@ -38,7 +38,7 @@ def media_index(type_):
         if can_traverse:
             objects.append(page)
 
-    return render_template('/media/index.haml', media_objects=objects)
+    return render_template('/media/index.haml', media_type=type_, media_objects=objects)
 
 
 @app.route('/<media_type:type_>/<path:name>', methods=['GET', 'POST'])
@@ -80,14 +80,6 @@ def media(type_='page', name='Index', ext=None):
         return redirect(url_for('media', type_=media.type, name=media.slug))
 
     action = request.args.get('action')
-
-    # Delegate to the media object.
-    if ext:
-        if action:
-            abort(404)
-        if not media.id:
-            abort(404)
-        return media.handle_typed_request(ext)
 
     if action == 'history':
         return render_template('media/history.haml',
@@ -151,9 +143,16 @@ def media(type_='page', name='Index', ext=None):
             if not version:
                 abort(404)
         else:
-            version = media.latest if media else None
+            version = media.latest
 
-        
+        # Delegate to the media object.
+        if ext:
+            if action:
+                abort(404)
+            if not media.id:
+                abort(404)
+            return media.handle_typed_request(version, ext)
+
         return render_template('media/read.haml',
             media=media,
             version=version,

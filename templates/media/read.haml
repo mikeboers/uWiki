@@ -28,8 +28,25 @@
         #media-content= markdown(version.content)
 
     - elif media.type == 'image':
-        %code &= version.content
+        
+        %h1.image-title &= media.title
+        %img.image-main(src=media.build_url())
 
+        %h2.image-example-title Examples
+        %ul.image-examples
+
+            @example(desc, **kwargs)
+                %li
+                    - url = media.build_url(**kwargs)
+                    ${desc|h}:
+                    %code ![${media.title}](${url})
+                    %br
+                    %a(href=url) %img(title=media.title, src=url)
+
+            +example('Smaller', width=400)
+            +example('Thumbnail', width=120, height=100)
+            +example('Square Thumbnail', mode='crop', width=100, height=100)
+            
     - else:
         %em We don't know how to deal with ${media.type}.
 

@@ -8,6 +8,8 @@ from flask_login import LoginManager
 from flask_mako import MakoTemplates, TemplateError
 from flask_sqlalchemy import SQLAlchemy
 from flask_acl import ACLManager
+from flask_images import Images
+
 import haml
 
 from .markdown import markdown
@@ -25,6 +27,11 @@ app.config['MAKO_PREPROCESSOR'] = haml.preprocessor
 app.config['MAKO_MODULE_DIRECTORY'] = os.path.join(app.instance_path, 'mako')
 mako = MakoTemplates(app)
 
+app.config['IMAGES_URL'] = None
+app.config['IMAGES_CACHE'] = os.path.join(app.instance_path, 'cache', 'images')
+app.config['IMAGES_SIGN_URLS'] = False
+app.config['IMAGES_PATH'] = [os.path.join(app.instance_path, 'images')]
+image_manager = Images(app)
 
 
 _static_etags = {}

@@ -6,11 +6,14 @@
     %li Index
 
 %h1
-    Index
+    ${media_type.title()} Index
 
-%ul
+%ul#media-index
     - for media in media_objects:
         %li
-            %a(href=url_for('media', type_=media.type, name=media.slug)) &= media.title
+            %a(href=url_for('media', type_=media.type, name=media.slug))
+                - if media.type == 'image':
+                    %img(src=media.build_url(mode='crop', width=50, height=50))
+                &= media.title
             - if media.latest.acl and authz.can('auth', media):
                 %br %small %code &= media.latest.acl

@@ -20,6 +20,9 @@ Flask-Login
 -e lib/Flask-ACL
 bcrypt
 
+Pillow
+-e lib/Flask-Images
+
 Pygments
 
 #gevent
