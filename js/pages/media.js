@@ -43,12 +43,15 @@ function setup_ace_editor() {
 
 function setup_mde_editor() {
 
-    var $textarea = $('#content');
-    var editor = new SimpleMDE({element: $textarea[0]});
+    var $form = $('form#media-form');
 
-    $textarea.closest('form').submit(function() {
-        $textarea.val(editor.value());
-    });
+    if ($form.data().mediaType == 'page') {
+        var $textarea = $('#content');
+        var editor = new SimpleMDE({element: $textarea[0]});
+        $form.submit(function() {
+            $textarea.val(editor.value());
+        });
+    }
 
 }
 

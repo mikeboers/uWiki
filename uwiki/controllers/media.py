@@ -2,28 +2,14 @@ import difflib
 import re
 
 from flask_login import current_user, login_required
-from flask_wtf import FlaskForm as Form
-import flask_acl.core
-import wtforms as wtf
 
 from . import *
 from ..auth import ACL
-from ..models.media import parse_short_acl
+from ..models.media import parse_short_acl, ident_to_cls as media_ident_to_cls
 from ..utils import sluggify_name
 
 
-def validate_acl(form, self):
-    acl = self.data
-    if acl:
-        try:
-            list(flask_acl.core.parse_acl(parse_short_acl(acl, strict=True)))
-        except ValueError as e:
-            raise wtf.validators.ValidationError(e.args[0])
 
-class MediaForm(Form):
-    title = wtf.TextField(validators=[wtf.validators.Required()])
-    acl = wtf.TextField('Access Control List', validators=[validate_acl])
-    content = wtf.TextAreaField(validators=[wtf.validators.Required()])
 
 
 @app.route('/<media_type:type_>/')
@@ -66,7 +52,7 @@ def media(type_='page', name='Index', ext=None):
     )).first()
 
     if not media:
-        media = Media(type=type_)
+        media = media_ident_to_cls[type_](type=type_)
         media.title = re.sub(r'\s*/\s*', ' / ', name)
         media.owner = current_user
 
@@ -114,7 +100,7 @@ def media(type_='page', name='Index', ext=None):
             return app.login_manager.unauthorized()
         can_acl = authz.can('auth', media)
 
-        form = MediaForm(request.form, obj=media)
+        form = media.form_class(obj=media)
 
         if can_acl and form.acl.data is None:
             form.acl.data = (media.latest.acl if media.latest else '') or ''
@@ -125,17 +111,17 @@ def media(type_='page', name='Index', ext=None):
                 db.session.add(media)
 
             media.title = form.title.data
-            media.add_version(content=form.content.data, acl=form.acl.data if can_acl else None)
+            
+            new_content = media.get_form_content(form)
+            if new_content is None:
+                new_content = media.content
+            media.add_version(content=new_content, acl=form.acl.data if can_acl else None)
 
             db.session.commit()
 
             return redirect(url_for('media', type_=media.type, name=media.slug))
 
-        # Reasonable defaults for first edit.
-        if not media.id:
-            form.content.data = '# ' + media.title
-
-        # Manually copy the ACL.
+        media.prep_form(form)
 
         return render_template('media/edit.haml',
             media=media,

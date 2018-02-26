@@ -1,4 +1,5 @@
 import flask
+import wtforms as wtf
 
 from .core import Media
 
@@ -10,6 +11,17 @@ class Page(Media):
     )
 
     _url_key = 'wiki'
+    
+    class form_class(Media.form_class):
+        content = wtf.TextAreaField(validators=[wtf.validators.Required()])
+
+    def prep_form(self, form):
+        # Reasonable defaults for first edit.
+        if not self.id:
+            form.content.data = '# ' + self.title
+
+    def get_form_content(self, form):
+        return form.content.data
     
     def handle_typed_request(self, type_):
 

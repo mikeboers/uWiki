@@ -10,7 +10,7 @@
 
 +media_utils.nav(media)
 
-%form(method='POST')
+%form#media-form(method='POST', enctype='multipart/form-data', dataMediaType=media.type)
     +utils.render_form(form, flags=False)
     %button.btn.btn-primary(type='submit') Save
     

@@ -2,11 +2,15 @@ import datetime
 import logging
 import re
 
-import flask
 from flask_login import current_user
-import flask_acl.state
+from flask_wtf import FlaskForm
+import flask
 import sqlalchemy as sa
 import werkzeug as wz
+import wtforms as wtf
+
+import flask_acl.core
+import flask_acl.state
 
 from ...auth import Group as GroupPredicate
 from ...core import app, db
@@ -14,6 +18,61 @@ from ...utils import sluggify_name
 
 
 log = logging.getLogger(__name__)
+
+
+
+short_perms = set(('write', 'read', 'list', 'traverse', 'ANY', 'ALL'))
+short_perm_sets = {
+    '$write': ('write', 'read', 'list', 'traverse'),
+    '$read': ('read', 'list', 'traverse'),
+}
+
+def parse_short_acl(acl, strict=True):
+    for ace, (state, pred, perm) in _parse_short_acl(acl, strict):
+        if perm not in short_perms:
+            msg = 'ACE parse error on %r; unknown permission' % ace
+            if strict:
+                raise ValueError(msg)
+            else:
+                log.warning(msg)
+        yield (state, pred, perm)
+
+def _parse_short_acl(acl, strict):
+
+    for ace in acl.split(';'):
+
+        default_state = True
+        parts = ace.strip().split()
+
+        if len(parts) == 3:
+            yield ace, parts
+            continue
+
+        if len(parts) != 2:
+            msg = 'ACE parse error on %r; invalid format' % ace
+            if strict:
+                raise ValueError(msg)
+            else:
+                log.warning(msg)
+            continue
+
+        pred, perms = parts
+        for perm in perms.split(','):
+            state = default_state
+            if perm.startswith('-'):
+                state = not state
+                perm = perm[1:]
+            for x in short_perm_sets.get(perm, (perm, )):
+                yield ace, (state, pred, x)
+
+
+def validate_acl(form, self):
+    acl = self.data
+    if acl:
+        try:
+            list(flask_acl.core.parse_acl(parse_short_acl(acl, strict=True)))
+        except ValueError as e:
+            raise wtf.validators.ValidationError(e.args[0])
 
 
 class Media(db.Model):
@@ -32,6 +91,10 @@ class Media(db.Model):
 
     _title = db.Column('title', db.String)
     owner = sa.orm.relationship('User')
+
+    class form_class(FlaskForm):
+        title = wtf.TextField(validators=[wtf.validators.Required()])
+        acl = wtf.TextField('Access Control List', validators=[validate_acl])
 
     def __repr__(self):
         return '<%s %s>' % (
@@ -84,6 +147,9 @@ class Media(db.Model):
         self.versions.append(version)
         self._latest = version
 
+    def prep_form(self, form):
+        pass
+    
     @property
     def __acl__(self):
 
@@ -100,49 +166,6 @@ class Media(db.Model):
         flask.abort(404)
 
 
-short_perms = set(('write', 'read', 'list', 'traverse', 'ANY', 'ALL'))
-short_perm_sets = {
-    '$write': ('write', 'read', 'list', 'traverse'),
-    '$read': ('read', 'list', 'traverse'),
-}
-
-def parse_short_acl(acl, strict=True):
-    for ace, (state, pred, perm) in _parse_short_acl(acl, strict):
-        if perm not in short_perms:
-            msg = 'ACE parse error on %r; unknown permission' % ace
-            if strict:
-                raise ValueError(msg)
-            else:
-                log.warning(msg)
-        yield (state, pred, perm)
-
-def _parse_short_acl(acl, strict):
-
-    for ace in acl.split(';'):
-
-        default_state = True
-        parts = ace.strip().split()
-
-        if len(parts) == 3:
-            yield ace, parts
-            continue
-
-        if len(parts) != 2:
-            msg = 'ACE parse error on %r; invalid format' % ace
-            if strict:
-                raise ValueError(msg)
-            else:
-                log.warning(msg)
-            continue
-
-        pred, perms = parts
-        for perm in perms.split(','):
-            state = default_state
-            if perm.startswith('-'):
-                state = not state
-                perm = perm[1:]
-            for x in short_perm_sets.get(perm, (perm, )):
-                yield ace, (state, pred, x)
 
 
 class MediaVersion(db.Model):

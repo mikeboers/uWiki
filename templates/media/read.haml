@@ -2,6 +2,7 @@
 %%namespace(name='utils', file='/_utils.haml')
 %%namespace(name='media_utils', file='./_utils.haml')
 
+<!-- DEBUG: ${repr(media)|h}
 <!-- DEBUG AUTH: current_user.groups: ${', '.join(sorted(current_user.groups))|h} -->
 <!-- DEBUG AUTH: current_user.roles: ${', '.join(sorted(current_user.roles))|h} -->
 <!-- DEBUG AUTH: media.latest.acl: ${media.latest.acl if media.latest else ''|h} -->
@@ -25,6 +26,9 @@
 
     - if media.type == 'page':
         #media-content= markdown(version.content)
+
+    - elif media.type == 'image':
+        %code &= version.content
 
     - else:
         %em We don't know how to deal with ${media.type}.
