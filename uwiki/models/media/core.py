@@ -62,7 +62,10 @@ class Media(db.Model):
     @property
     def latest(self):
         if self._latest is None:
-            self._latest = MediaVersion.query.filter(MediaVersion.object_id == self.id).order_by(MediaVersion.id.desc()).first() or False
+            if self.id:
+                self._latest = MediaVersion.query.filter(MediaVersion.object_id == self.id).order_by(MediaVersion.id.desc()).first() or False
+            else:
+                self._latest = False
         return self._latest
 
     @property
@@ -83,10 +86,15 @@ class Media(db.Model):
 
     @property
     def __acl__(self):
+
         yield 'ALLOW WHEEL ALL'
+
         if self.latest:
             for ace in self.latest.__acl__:
                 yield ace
+
+        else:
+            yield 'ALLOW AUTHENTICATED ALL' # Adds on 'create' and 'auth'.
 
     def handle_typed_request(self, ext):
         flask.abort(404)

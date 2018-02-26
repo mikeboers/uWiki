@@ -2,21 +2,19 @@
 %%namespace(name='utils', file='/_utils.haml')
 %%namespace(name='media_utils', file='./_utils.haml')
 
-- type_str = (media.type if media else None) or media_type or 'media'
-
 <!-- DEBUG AUTH: current_user.groups: ${', '.join(sorted(current_user.groups))|h} -->
 <!-- DEBUG AUTH: current_user.roles: ${', '.join(sorted(current_user.roles))|h} -->
-<!-- DEBUG AUTH: media.latest.acl: ${media.latest.acl if media else ''|h} -->
+<!-- DEBUG AUTH: media.latest.acl: ${media.latest.acl if media.latest else ''|h} -->
 <!-- DEBUG AUTH: version.acl: ${version.acl if version else ''|h} -->
 
 
 @breadcrumb
     %li
-        &= media.title if media else name
+        &= media.title
         ##- if media and not media.is_public:
         ##    %span.glyphicon.glyphicon-eye-close
 
-+media_utils.nav(name, media)
++media_utils.nav(media)
 
 - if version:
     
@@ -25,7 +23,11 @@
             %strong This ${type_str} is out of date.
             %a(href=url_for('media', type_=media.type, name=media.slug)) See the most recent version.
 
-    #media-content= markdown(version.content)
+    - if media.type == 'page':
+        #media-content= markdown(version.content)
+
+    - else:
+        %em We don't know how to deal with ${media.type}.
 
 - else:
-    %em This ${type_str} has no content.
+    %em This ${media.type} has no content.

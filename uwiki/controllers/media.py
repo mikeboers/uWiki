@@ -1,4 +1,5 @@
 import difflib
+import re
 
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm as Form
@@ -64,14 +65,19 @@ def media(type_='page', name='Index', ext=None):
         Media.slug.like(slug), # We use `like` to get case insensitivity.
     )).first()
 
+    if not media:
+        media = Media(type=type_)
+        media.title = re.sub(r'\s*/\s*', ' / ', name)
+        media.owner = current_user
+
     # Make sure private pages stay that way.
-    if media and not authz.can('read', media):
+    if not authz.can('read', media):
         if authz.can('list', media):
             abort(403)
         else:
             abort(404)
 
-    if media and '/' in media.slug:
+    if media.id and '/' in media.slug:
         path = slug.split('/')
         parent_slugs = ['/'.join(path[:i]) for i in xrange(1, len(path))]
         parents = Media.query.filter(Media.slug.in_(parent_slugs)).all()
@@ -80,11 +86,11 @@ def media(type_='page', name='Index', ext=None):
                 abort(404)
 
     # If it doesn't exist, don't let non-users create it.
-    if not media and not authz.can('create', ACL('ALLOW AUTHENTICATED ALL')):
+    if not media.id and not authz.can('create', media):
         abort(404)
 
     # Assert we are on the normalized URL.
-    if media and media.slug != slug:
+    if media.id and media.slug != slug:
         return redirect(url_for('media', type_=media.type, name=media.slug))
 
     action = request.args.get('action')
@@ -93,30 +99,29 @@ def media(type_='page', name='Index', ext=None):
     if ext:
         if action:
             abort(404)
-        if not media:
+        if not media.id:
             abort(404)
         return media.handle_typed_request(ext)
 
     if action == 'history':
-        return render_template('media/history.haml', name=slug, media=media)
+        return render_template('media/history.haml',
+            media=media,
+        )
 
     elif action == 'edit':
 
-        if media and not authz.can('write', media):
+        if not authz.can('write', media):
             return app.login_manager.unauthorized()
+        can_acl = authz.can('auth', media)
 
         form = MediaForm(request.form, obj=media)
 
-        can_acl = not (media and not authz.can('auth', media))
-
         if can_acl and form.acl.data is None:
-            form.acl.data = (media.latest.acl if media else '') or ''
+            form.acl.data = (media.latest.acl if media.latest else '') or ''
 
         if form.validate_on_submit():
 
-            if not media:
-                media = Media(type='page')
-                media.owner = current_user
+            if not media.id:
                 db.session.add(media)
 
             media.title = form.title.data
@@ -127,14 +132,15 @@ def media(type_='page', name='Index', ext=None):
             return redirect(url_for('media', type_=media.type, name=media.slug))
 
         # Reasonable defaults for first edit.
-        if media is None:
-            title = name.replace('/', ' / ')
-            form.title.data = title
-            form.content.data = '# ' + title
+        if not media.id:
+            form.content.data = '# ' + media.title
 
         # Manually copy the ACL.
 
-        return render_template('media/edit.haml', name=slug, media=media, form=form)
+        return render_template('media/edit.haml',
+            media=media,
+            form=form,
+        )
 
     elif action == 'diff':
         v1 = media.get_version(int(request.args['v1']))
@@ -143,7 +149,6 @@ def media(type_='page', name='Index', ext=None):
         diff = [(line[0], line[2:]) for line in diff]
         return render_template('media/diff.haml',
             media=media,
-            name=name,
             v1=v1,
             v2=v2,
             diff=diff,
@@ -165,8 +170,6 @@ def media(type_='page', name='Index', ext=None):
         
         return render_template('media/read.haml',
             media=media,
-            media_type=type_,
             version=version,
-            name=name,
         )
 

@@ -4,20 +4,20 @@
 
 @breadcrumb
     %li
-        &= media.title if media else name
+        &= media.title
         ##- if not media.is_public:
         ##    %span.glyphicon.glyphicon-eye-close
 
-+media_utils.nav(name)
++media_utils.nav(media)
 
-%h1 History of "${name}"
+%h1 History of "${media.title}"
 
 
-- if media and media.versions:
+- if media.versions:
     - versions = list(reversed(media.versions))
     %ul - for i, version in enumerate(versions):
         %li
-            %a(href=url_for('media', type_=media.type, name=name, v=version.id))
+            %a(href=url_for('media', type_=media.type, name=media.slug, v=version.id))
                 %strong
                     ${version.created_at.strftime('%b %d, %Y at %H:%M %p')}
                 by
@@ -26,8 +26,8 @@
                     %small (${version.creator.name|h})
             - if i < len(versions) - 1:
                 ::
-                %a(href=url_for('media', type_=media.type, name=name, action='diff', v1=versions[i + 1].id, v2=version.id))
+                %a(href=url_for('media', type_=media.type, name=media.slug, action='diff', v1=versions[i + 1].id, v2=version.id))
                     Changes.
 
 - else:
-    %em This media has no content.
+    %em This ${media.type} has no content.

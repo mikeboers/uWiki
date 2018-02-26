@@ -1,5 +1,5 @@
 
-@nav(name, media=None, active=None)
+@nav(media, active=None)
 
     -
         if not current_user.is_authenticated:
@@ -8,7 +8,7 @@
     - active = active or request.args.get('action', '')
     @tab(action, class_='')
         %li(class_=('active ' if action == active else '') + class_)
-            %a(href='#' if action == active else url_for('media', type_='page', name=name, **{'action': action} if action else {}))
+            %a(href='#' if action == active else url_for('media', type_=media.type, name=media.slug, **{'action': action} if action else {}))
                 +caller.body
 
     %ul.nav.nav-tabs

@@ -4,11 +4,11 @@
 
 @breadcrumb
     %li
-        &= media.title if media else name
+        &= media.title
         ##- if media and not media.is_public:
         ##    %span.glyphicon.glyphicon-eye-close
 
-+media_utils.nav(name)
++media_utils.nav(media)
 
 %form(method='POST')
     +utils.render_form(form, flags=False)

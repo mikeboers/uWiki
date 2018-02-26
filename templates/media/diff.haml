@@ -15,13 +15,13 @@
 
 @breadcrumb
     %li
-        &= page.title if page else name
-        ##- if page and not page.is_public:
+        &= media.title
+        ##- if media and not media.is_public:
         ##    %span.glyphicon.glyphicon-eye-close
 
-+page_utils.nav(name, page)
++page_utils.nav(media)
 
-%h1 Changes to "${name}"
+%h1 Changes to "${media.title}"
 %h4 
     Made on
     %strong ${v2.created_at.strftime('%b %d, %Y at %H:%M %p')}
