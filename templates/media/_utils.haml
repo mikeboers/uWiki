@@ -13,7 +13,7 @@
 
     %ul.nav.nav-tabs
         +tab('') Read
-        - if media is None or authz.can('media.write', media):
+        - if media is None or authz.can('write', media):
             +tab('edit') Edit
         +tab('history', class_='pull-right') View History
 
